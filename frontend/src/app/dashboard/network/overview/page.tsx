@@ -2,12 +2,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
+import { ChartLineInteractive } from './chart-line-interactive'
+import { ChartLineLinear } from './chart-line-linear';
 
 export default function NetworkOverviewPage() {
   const t = useTranslations('navigation');
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      {/*
       <Card>
         <CardHeader>
           <CardTitle>{t('network')} - {t('overview')}</CardTitle>
@@ -27,7 +30,10 @@ export default function NetworkOverviewPage() {
             <li>Real-time language switching</li>
           </ul>
         </CardContent>
-      </Card>
+      </Card>*/}
+
+      {/*<ChartLineInteractive/>*/}
+      <ChartLineLinear/>
     </div>
   );
 }

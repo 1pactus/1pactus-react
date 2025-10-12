@@ -29,6 +29,17 @@
     "feedback": "反馈",
     "watchAddress": "观察地址"
   },
+  "network/overview": {
+    "block-committed-title": "已提交区块数量",
+    "block-committed-description": "过去 180 天内每天提交的区块数量",
+    "totalValidators": "总验证者数",
+    "activeValidators": "活跃验证者数",
+    "totalStaked": "总质押量",
+    "totalSupply": "总供应量",
+    "averageUptime": "平均在线率",
+    "recentBlocks": "最近区块",
+    "recentTransactions": "最近交易"
+  },
   "demo": {
     "title": "国际化演示",
     "description": "这是一个支持英文和中文的 next-intl 演示。",
