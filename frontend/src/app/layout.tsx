@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { IntlProvider } from "@/components/providers/intl-provider";
+import { LocaleProvider } from "@/hooks/use-locale";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,11 @@ export default function Layout({ children }: Readonly<{ children: React.ReactNod
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
+          <LocaleProvider>
+            <IntlProvider>
+              {children}
+            </IntlProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

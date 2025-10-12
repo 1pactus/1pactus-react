@@ -1,0 +1,45 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "language": "Language",
+    "english": "English",
+    "chinese": "中文",
+    "home": "Home"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "network": "Network",
+    "overview": "Overview",
+    "validators": "Validators",
+    "trends": "Trends",
+    "supply": "Supply",
+    "bond": "Bond",
+    "unbond": "Unbond",
+    "stake": "Stake",
+    "reward": "Reward",
+    "topAddresses": "Top Addresses",
+    "topTransfer": "Top Transfer",
+    "topBond": "Top Bond",
+    "topReward": "Top Reward",
+    "topWithdraw": "Top Withdraw",
+    "publicAddresses": "Public Addresses",
+    "support": "Support",
+    "feedback": "Feedback",
+    "watchAddress": "Watch Address"
+  },
+  "demo": {
+    "title": "Internationalization Demo",
+    "description": "This is a demonstration of next-intl with English and Chinese support.",
+    "currentLanguage": "Current Language",
+    "switchLanguage": "Switch Language",
+    "content": {
+      "greeting": "Hello! Welcome to our application.",
+      "features": "Features",
+      "feature1": "Easy language switching",
+      "feature2": "Client-side rendering support",
+      "feature3": "Type-safe translations"
+    }
+  }
+}

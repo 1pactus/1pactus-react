@@ -21,7 +21,7 @@ import {
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   data: {
-    user: NavUserProps["user"];
+    user?: NavUserProps["user"];
     navMain: NavMainProps["items"];
     navSecondary: NavSecondaryProps["items"];
     projects: NavProjectsProps["projects"];
@@ -54,9 +54,9 @@ export function AppSidebar({ data, currentPath, ...props }: AppSidebarProps) {
         <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
+      {/*<SidebarFooter>
         <NavUser user={data.user} />
-      </SidebarFooter>
+      </SidebarFooter>*/}
     </Sidebar>
   )
 }

@@ -1,0 +1,45 @@
+{
+  "common": {
+    "welcome": "欢迎",
+    "language": "语言",
+    "english": "English",
+    "chinese": "中文",
+    "home": "首页"
+  },
+  "navigation": {
+    "dashboard": "仪表板",
+    "settings": "设置",
+    "profile": "个人资料",
+    "network": "网络",
+    "overview": "概览",
+    "validators": "验证者",
+    "trends": "趋势",
+    "supply": "供应量",
+    "bond": "质押",
+    "unbond": "解除质押",
+    "stake": "权益",
+    "reward": "奖励",
+    "topAddresses": "热门地址",
+    "topTransfer": "转账排行",
+    "topBond": "质押排行",
+    "topReward": "奖励排行",
+    "topWithdraw": "提取排行",
+    "publicAddresses": "公共地址",
+    "support": "支持",
+    "feedback": "反馈",
+    "watchAddress": "观察地址"
+  },
+  "demo": {
+    "title": "国际化演示",
+    "description": "这是一个支持英文和中文的 next-intl 演示。",
+    "currentLanguage": "当前语言",
+    "switchLanguage": "切换语言",
+    "content": {
+      "greeting": "你好！欢迎使用我们的应用程序。",
+      "features": "功能特性",
+      "feature1": "轻松切换语言",
+      "feature2": "支持客户端渲染",
+      "feature3": "类型安全的翻译"
+    }
+  }
+}

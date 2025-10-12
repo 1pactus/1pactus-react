@@ -1,7 +1,7 @@
 'use client'
 
 import { AppSidebar } from "@/components/app-sidebar"
-import { NavData, NavPageRoot } from "./config"
+import { useNavData, NavPageRoot } from "@/hooks/use-nav-data"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,22 +22,26 @@ import {
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useTranslations } from 'next-intl'
 
 export default function Page({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname()
+  const t = useTranslations('navigation')
+  const navData = useNavData()
 
   // Function to generate breadcrumb data
   const generateBreadcrumbs = () => {
     const breadcrumbs = [
       {
-        title: "Home",
+        title: t('dashboard'),
         href: NavPageRoot,
         isActive: false
       }
     ]
 
     // Match navigation items based on current path
-    for (const navItem of NavData.navMain) {
+    for (const navItem of navData.navMain) {
       for (const subItem of navItem.items || []) {
         if (subItem.url === pathname) {
           breadcrumbs.push({
@@ -76,7 +80,7 @@ export default function Page({ children }: Readonly<{ children: React.ReactNode 
   const breadcrumbs = generateBreadcrumbs()
   return (
     <SidebarProvider>
-      <AppSidebar data={NavData} currentPath={pathname} />
+      <AppSidebar data={navData} currentPath={pathname} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 justify-between">
           <div className="flex items-center gap-2 px-4">
@@ -110,6 +114,7 @@ export default function Page({ children }: Readonly<{ children: React.ReactNode 
           </div>
           
           <div className="flex items-center gap-2 px-4">
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </header>
