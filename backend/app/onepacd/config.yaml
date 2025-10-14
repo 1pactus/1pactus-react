@@ -1,0 +1,27 @@
+app:
+  run_mode: "debug"
+  name: "onepacd"
+log:
+  out_path: ./log
+  max_size: 1024
+  max_backups: 30
+  max_age: 14
+  compress: true
+  console_log: true
+record_log:
+  out_path: ./record_log
+  max_size: 1024
+  max_backups: 30
+  max_age: 14
+  compress: true
+  console_log: false
+mongo:
+  uri: ${ONEPACD_MONGODB_SERVER:-mongodb://localhost:27017}
+  database: onepacd
+  password:
+  healthcheck: 20
+redis:
+  addr: ${ONEPACD_REDIS_SERVER:-localhost:6379}
+  password:
+  db: 0
+  healthcheck: 10

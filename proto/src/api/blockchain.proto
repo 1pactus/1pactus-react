@@ -1,0 +1,11 @@
+syntax = "proto3";
+option go_package = "github.com/frimin/1pactus-react/backend/proto/api";
+package api;
+
+message GetNetworkHealthRequest {
+    uint64 id = 1; 
+}
+
+message GetNetworkHealthResponse {
+    uint64 id = 2;
+}
