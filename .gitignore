@@ -3,38 +3,38 @@
 .vscode
 
 # dependencies
-frontend/node_modules
-frontend/.pnp
-frontend/.pnp.js
+web/node_modules
+web/.pnp
+web/.pnp.js
 
 # testing
-frontend/coverage
+web/coverage
 
 # next.js
-frontend/.next/
-frontend/out/
+web/.next/
+web/out/
 
 # production
-frontend/build
+web/build
 
 # misc
 .DS_Store
 *.pem
 
 # debug
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
 
 # local env files
-frontend/.env*.local
-frontend/.env
+web/.env*.local
+web/.env
 
 # vercel
-frontend/.vercel
+web/.vercel
 
 # typescript
 *.tsbuildinfo
-frontend/next-env.d.ts
+web/next-env.d.ts
 
 log
