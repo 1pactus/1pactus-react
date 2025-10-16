@@ -1,6 +1,12 @@
 package onepacd
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	gather "github.com/frimin/1pactus-react/app/onepacd/service/gather"
 	"github.com/frimin/1pactus-react/app/onepacd/service/webapi"
 	"github.com/frimin/1pactus-react/app/onepacd/store"
@@ -19,8 +25,8 @@ var (
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
-	dataCollect = gather.NewGatherService(appLifeCycle, launchConfig.Service.Gather)
-	webApi = webapi.NewWebApiService(appLifeCycle)
+	dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather)
+	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 
 	appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
@@ -38,7 +44,7 @@ func Run() {
 
 	defer log.Info("BYE")
 
-	if err := store.Init(launchConfig.ConfigBase); err != nil {
+	if err := store.Init(conf.ConfigBase); err != nil {
 		log.Fatalf("failed to initialize store: %v", err)
 	}
 
@@ -50,5 +56,40 @@ func Run() {
 
 	RunServices()
 
-	appLifeCycle.WaitForAllServiceDone()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+
+	go func() {
+		shutdownInitiated := false
+		timeoutTimer := time.NewTimer(0)
+		timeoutTimer.Stop()
+
+		for {
+			select {
+			case sig := <-sigChan:
+				if shutdownInitiated {
+					log.Infof("received signal %v during shutdown, ignoring", sig)
+					continue
+				}
+				shutdownInitiated = true
+				log.Infof("received signal: %v, initiating graceful shutdown", sig)
+				appLifeCycle.StopAppSignal()
+				timeoutTimer.Reset(30 * time.Second)
+			case <-appLifeCycle.ServiceDone():
+				log.Info("all services shutdown completed")
+				cancel()
+				return
+			case <-timeoutTimer.C:
+				log.Warn("shutdown timeout (30s), forcing exit")
+				cancel()
+				return
+			}
+		}
+	}()
+
+	<-ctx.Done()
+	log.Info("application shutdown completed")
 }

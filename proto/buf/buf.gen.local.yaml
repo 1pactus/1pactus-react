@@ -3,6 +3,6 @@ version: v2
 plugins:
   - protoc_builtin: go
     protoc_path:  /usr/local/bin/protoc
-    out: ../backend/proto
+    out: ./gen/go
     opt: 
      - paths=source_relative

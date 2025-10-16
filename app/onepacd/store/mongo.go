@@ -2,10 +2,15 @@ package store
 
 import (
 	"log"
+	"time"
 
 	"github.com/frimin/1pactus-react/config"
 	"github.com/frimin/1pactus-react/stored/storedriver"
 	"go.mongodb.org/mongo-driver/mongo"
+)
+
+const (
+	MONGO_DB_TIMEOUT = 10 * time.Second
 )
 
 type mongoStore struct {
@@ -23,6 +28,8 @@ func (s *mongoStore) Init(store storedriver.Mongo, conf *config.MongoConfig) {
 	if err := s.db.Connect(s.GetDatabase()); err != nil {
 		log.Fatalf("error to connect db")
 	}
+
+	s.collection = s.db.collection
 }
 
 func (s *mongoStore) Indexes() map[*mongo.Collection][]mongo.IndexModel {

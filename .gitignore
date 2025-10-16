@@ -38,3 +38,7 @@ web/.vercel
 web/next-env.d.ts
 
 log_output
+
+build
+
+cmd/onepacd/__debug_bin*

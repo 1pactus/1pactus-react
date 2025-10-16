@@ -1,6 +1,8 @@
 package lifecycle
 
-import "context"
+import (
+	"context"
+)
 
 type ServiceLifeCycle struct {
 	appLifeCycle *AppLifeCycle

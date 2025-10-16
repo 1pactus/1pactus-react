@@ -1,6 +1,9 @@
 package data
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/frimin/1pactus-react/proto/gen/go/api"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type GlobalState struct {
 	TimeIndex         uint32 `bson:"time_index"`
@@ -27,6 +30,20 @@ type GlobalStateData struct {
 
 	ActiveValidatorCount int64 `bson:"active_validator_count"`
 	ActiveAccountCount   int64 `bson:"active_account_count"`
+}
+
+func (g *GlobalStateData) ToProto() *api.NetworkStatusData {
+	return &api.NetworkStatusData{
+		TimeIndex:         g.TimeIndex,
+		Stake:             g.Stake,
+		Supply:            g.Supply,
+		CirculatingSupply: g.CirculatingSupply,
+		Txs:               g.Txs,
+		Blocks:            g.Blocks,
+		Fee:               g.Fee,
+		ActiveValidator:   g.ActiveValidatorCount,
+		ActiveAccount:     g.ActiveAccountCount,
+	}
 }
 
 func NewGlobalStateData() *GlobalState {

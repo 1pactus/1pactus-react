@@ -10,12 +10,12 @@ type Config struct {
 	Service            *service.Config `mapstructure:"service"`
 }
 
-var launchConfig = Config{
+var conf = Config{
 	ConfigBase: config.NewDefaultConfigBaseConfig(),
 	Service:    service.NewDefaultServiceConfig(),
 }
 
 func LoadConfig(app string, files []string, cliOverrides []string) (err error) {
-	err = config.LoadConfig(app, files, cliOverrides, &launchConfig)
+	err = config.LoadConfig(app, files, cliOverrides, &conf)
 	return
 }

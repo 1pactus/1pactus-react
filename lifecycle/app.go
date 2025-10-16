@@ -28,12 +28,13 @@ func (alc *AppLifeCycle) StopAppSignal() {
 
 func (alc *AppLifeCycle) WatchServiceLifeCycle(serviceLifeCycle *ServiceLifeCycle) {
 	alc.wg.Add(1)
-	/*go func() {
-		defer alc.wg.Done()
-		<-serviceLifeCycle.Done()
-	}()*/
 }
 
-func (alc *AppLifeCycle) WaitForAllServiceDone() {
-	alc.wg.Wait()
+func (alc *AppLifeCycle) ServiceDone() <-chan struct{} {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		defer cancel()
+		alc.wg.Wait()
+	}()
+	return ctx.Done()
 }
