@@ -43,7 +43,7 @@ func (s *DataGatherService) Run() {
 func (s *DataGatherService) StartGather() error {
 	s.log.Infof("start gather")
 	defer s.log.Infof("gather stopped")
-	cg := NewChainGather(s.config.GrpcServers)
+	cg := NewChainGather(s.log, s.config.GrpcServers)
 
 	if err := cg.Connect(); err != nil {
 		return fmt.Errorf("failed to connect to grpc servers: %w", err)

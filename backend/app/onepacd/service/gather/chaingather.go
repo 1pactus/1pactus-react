@@ -3,13 +3,13 @@ package gather
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/frimin/1pactus-react/backend/app/onepacd/store"
 	db "github.com/frimin/1pactus-react/backend/app/onepacd/store"
 	"github.com/frimin/1pactus-react/backend/app/onepacd/store/data"
+	"github.com/frimin/1pactus-react/backend/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
@@ -20,12 +20,14 @@ const (
 type ChainGather struct {
 	db   *db.DbClient
 	grpc *grpcClient
+	log  log.ILogger
 }
 
-func NewChainGather(grpcServers []string) *ChainGather {
+func NewChainGather(log log.ILogger, grpcServers []string) *ChainGather {
 	p := &ChainGather{
 		db:   db.NewDBClient(),
 		grpc: newGrpcClient(time.Second*10, grpcServers),
+		log:  log,
 	}
 
 	return p
@@ -83,17 +85,17 @@ func (p *ChainGather) startCommit(wg *sync.WaitGroup) (chan *db.DBCommit, chan e
 			commit := <-commitChan
 
 			if commit == nil {
-				log.Printf("commitChan closed")
+				p.log.Infof("commitChan closed")
 				wg.Done()
 				return
 			}
 
 			if err := p.db.Commit(commit); err != nil {
-				log.Printf("commit failed: %v", err)
+				p.log.Errorf("commit failed: %v", err)
 				errorChan <- err
 			}
 
-			log.Printf("commit height=%d/%d (%.2f%%) timeIndex=%d time=%v",
+			p.log.Infof("commit height=%d/%d (%.2f%%) timeIndex=%d time=%v",
 				commit.GetHeight(), commit.GetLastBlockHeight(), float64(commit.GetHeight())/float64(commit.GetLastBlockHeight())*100, commit.GetTimeIndex(), time.Unix(int64(commit.GetTimeIndex()), 0).UTC())
 		}
 	}()
@@ -134,7 +136,7 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 	if topBlockInfo != nil {
 		height = topBlockInfo.Height
 		//beginHeight = int(height)
-		log.Printf("topBlockInfo.Height=%v", height)
+		p.log.Infof("topBlockInfo.Height=%v", height)
 	}
 
 	blockchainInfo, err := p.grpc.getBlockchainInfo()
@@ -157,16 +159,16 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Context cancelled, stopping FetchBlockchain")
+			p.log.Warn("Context cancelled, stopping FetchBlockchain")
 			return ctx.Err()
 		case err = <-commitErrChain:
-			log.Printf("commit error: %v", err)
+			p.log.Errorf("commit error: %v", err)
 			return err
 		default:
 			height++
 
 			if height >= lastBlockHeight {
-				log.Printf("top height reached: %v", height)
+				p.log.Infof("top height reached: %v", height)
 
 				commitChan <- nil // close commitChan
 				commitWg.Wait()
@@ -177,7 +179,7 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 			block, err := p.grpc.getBlock(height, pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
 
 			if err != nil {
-				log.Printf("getBlock failed: %v", err.Error())
+				p.log.Errorf("getBlock failed: %v", err.Error())
 
 				return err
 			}
