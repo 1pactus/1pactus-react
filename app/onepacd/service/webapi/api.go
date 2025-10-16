@@ -8,6 +8,7 @@ import (
 	"github.com/frimin/1pactus-react/app/onepacd/service/webapi/middleware"
 	"github.com/frimin/1pactus-react/lifecycle"
 	"github.com/frimin/1pactus-react/log"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,6 +36,7 @@ func (s *WebApiService) Run() {
 
 	_log := s.log
 
+	r.Use(cors.Default())
 	r.Use(middleware.CustomRecovery(s.log))
 	r.Use(middleware.Log(_log.GetInternalLogger()))
 

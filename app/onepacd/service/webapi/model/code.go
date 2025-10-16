@@ -63,8 +63,8 @@ func init() {
 	}
 }
 
-func ErrorFromCode(code int) error {
-	err, ok := allCodeToErrors[code]
+func ErrorFromCode(code int32) error {
+	err, ok := allCodeToErrors[int(code)]
 
 	if !ok {
 		return unknownError

@@ -15,9 +15,12 @@ message NetworkStatusData {
 }
 
 message GetNetworkHealthRequest {
-    int64 day = 1; 
+    int32 days = 1;  // @gotags: form:"days"
+    string datatype = 2; // @gotags: form:"datatype"
 }
 
 message GetNetworkHealthResponse {
-    repeated NetworkStatusData lines = 1;
+    int32 code = 1;
+    string msg = 2;
+    repeated NetworkStatusData lines = 3;
 }

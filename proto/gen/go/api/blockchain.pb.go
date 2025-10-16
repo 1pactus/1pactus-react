@@ -131,7 +131,8 @@ func (x *NetworkStatusData) GetActiveAccount() int64 {
 
 type GetNetworkHealthRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Day           int64                  `protobuf:"varint,1,opt,name=day,proto3" json:"day,omitempty"`
+	Days          int32                  `protobuf:"varint,1,opt,name=days,proto3" json:"days,omitempty" form:"days"`        // @gotags: form:"days"
+	Datatype      string                 `protobuf:"bytes,2,opt,name=datatype,proto3" json:"datatype,omitempty" form:"datatype"` // @gotags: form:"datatype"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -166,16 +167,25 @@ func (*GetNetworkHealthRequest) Descriptor() ([]byte, []int) {
 	return file_api_blockchain_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetNetworkHealthRequest) GetDay() int64 {
+func (x *GetNetworkHealthRequest) GetDays() int32 {
 	if x != nil {
-		return x.Day
+		return x.Days
 	}
 	return 0
 }
 
+func (x *GetNetworkHealthRequest) GetDatatype() string {
+	if x != nil {
+		return x.Datatype
+	}
+	return ""
+}
+
 type GetNetworkHealthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Lines         []*NetworkStatusData   `protobuf:"bytes,1,rep,name=lines,proto3" json:"lines,omitempty"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	Lines         []*NetworkStatusData   `protobuf:"bytes,3,rep,name=lines,proto3" json:"lines,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -210,6 +220,20 @@ func (*GetNetworkHealthResponse) Descriptor() ([]byte, []int) {
 	return file_api_blockchain_proto_rawDescGZIP(), []int{2}
 }
 
+func (x *GetNetworkHealthResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *GetNetworkHealthResponse) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
 func (x *GetNetworkHealthResponse) GetLines() []*NetworkStatusData {
 	if x != nil {
 		return x.Lines
@@ -232,11 +256,14 @@ const file_api_blockchain_proto_rawDesc = "" +
 	"\x06blocks\x18\x06 \x01(\x03R\x06blocks\x12\x10\n" +
 	"\x03fee\x18\a \x01(\x03R\x03fee\x12)\n" +
 	"\x10active_validator\x18\b \x01(\x03R\x0factiveValidator\x12%\n" +
-	"\x0eactive_account\x18\t \x01(\x03R\ractiveAccount\"+\n" +
-	"\x17GetNetworkHealthRequest\x12\x10\n" +
-	"\x03day\x18\x01 \x01(\x03R\x03day\"H\n" +
-	"\x18GetNetworkHealthResponse\x12,\n" +
-	"\x05lines\x18\x01 \x03(\v2\x16.api.NetworkStatusDataR\x05linesB3Z1github.com/frimin/1pactus-react/backend/proto/apib\x06proto3"
+	"\x0eactive_account\x18\t \x01(\x03R\ractiveAccount\"I\n" +
+	"\x17GetNetworkHealthRequest\x12\x12\n" +
+	"\x04days\x18\x01 \x01(\x05R\x04days\x12\x1a\n" +
+	"\bdatatype\x18\x02 \x01(\tR\bdatatype\"n\n" +
+	"\x18GetNetworkHealthResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x10\n" +
+	"\x03msg\x18\x02 \x01(\tR\x03msg\x12,\n" +
+	"\x05lines\x18\x03 \x03(\v2\x16.api.NetworkStatusDataR\x05linesB3Z1github.com/frimin/1pactus-react/backend/proto/apib\x06proto3"
 
 var (
 	file_api_blockchain_proto_rawDescOnce sync.Once

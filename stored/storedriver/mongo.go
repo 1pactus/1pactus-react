@@ -46,7 +46,7 @@ func MongoStart(name string, conf *config.MongoConfig, stores []IMongoStore) err
 		conf:    conf,
 		stores:  stores,
 		timeout: time.Second * 10, // Default timeout
-		log:     log.WithKv("module", "store").WithKv("redis", name),
+		log:     log.WithKv("module", "store").WithKv("mongo", name),
 	}
 
 	var err error

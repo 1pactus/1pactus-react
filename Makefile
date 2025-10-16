@@ -21,7 +21,14 @@ dev-tools:
 
 proto:
 	cd proto && buf generate --template ./buf/buf.gen.local.yaml --config ./buf/buf.yaml .
-	#protoc-go-inject-tag -input="serve/proto/base/*.pb.go"
+	protoc-go-inject-tag -input="proto/gen/go/api/*.pb.go"
+
+	protoc \
+		--plugin=./web/node_modules/.bin/protoc-gen-ts_proto \
+		--proto_path=./proto/src \
+		--ts_proto_out=./web/src/lib/proto/ \
+		--ts_proto_opt="esModuleInterop=true,forceLong=long" \
+		./proto/src/**/*.proto	
 
 tidy:
 	go mod tidy -C .

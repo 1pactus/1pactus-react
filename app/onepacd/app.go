@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/frimin/1pactus-react/app/onepacd/service/dummy"
 	gather "github.com/frimin/1pactus-react/app/onepacd/service/gather"
 	"github.com/frimin/1pactus-react/app/onepacd/service/webapi"
 	"github.com/frimin/1pactus-react/app/onepacd/store"
@@ -20,14 +21,17 @@ const (
 )
 
 var (
-	dataCollect *gather.DataGatherService
-	webApi      *webapi.WebApiService
+	dummyService *dummy.DummyService
+	dataCollect  *gather.DataGatherService
+	webApi       *webapi.WebApiService
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
+	//dummyService = dummy.NewDummyService(appLifeCycle)
 	dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather)
 	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 
+	//appLifeCycle.WatchServiceLifeCycle(dummyService.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
 
@@ -35,6 +39,7 @@ func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
 }
 
 func RunServices() {
+	//go dummyService.Run()
 	go dataCollect.Run()
 	go webApi.Run()
 }
