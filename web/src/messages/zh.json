@@ -30,8 +30,28 @@
     "watchAddress": "观察地址"
   },
   "network/overview": {
-    "block-committed-title": "已提交区块数量",
-    "block-committed-description": "过去 180 天内每天提交的区块数量",
+    "block-committed-title": "已提交的区块数量",
+    "block-committed-description": "每天提交的区块数量",
+    "transactions-committed-title": "已提交的交易数量",
+    "transactions-committed-description": "每天提交的交易数量",
+
+    "stake-title": "总质押量",
+    "stake-description": "每天的总质押量",
+
+    "supply-title": "总供应量",
+    "supply-description": "每天的总供应量",
+
+    "circulating-supply-title": "流通供应量",
+    "circulating-supply-description": "每天的流通供应量",
+
+    "fee-accumulation-title": "费用累计",
+    "fee-accumulation-description": "每天累计的费用",
+
+    "active-validators-title": "活跃验证者数量",
+    "active-validators-description": "每天活跃的验证者数量",
+    "active-accounts-title": "活跃账户数量",
+    "active-accounts-description": "每天活跃的账户数量",
+
     "totalValidators": "总验证者数",
     "activeValidators": "活跃验证者数",
     "totalStaked": "总质押量",

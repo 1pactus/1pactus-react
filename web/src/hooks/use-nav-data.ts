@@ -19,9 +19,10 @@ export function useNavData() {
     navMain: [
       {
         title: t('network'),
-        url: `#`,
+        url: `${NavPageRoot}/network`,
         icon: Map,
         items: [
+          /*
           {
             title: t('overview'),
             url: `${NavPageRoot}/network/overview`,
@@ -29,7 +30,7 @@ export function useNavData() {
           {
             title: t('validators'),
             url: `${NavPageRoot}/network/validators`,
-          },
+          },*/
         ],
       },
       {

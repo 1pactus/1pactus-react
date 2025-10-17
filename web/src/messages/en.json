@@ -29,6 +29,17 @@
     "feedback": "Feedback",
     "watchAddress": "Watch Address"
   },
+  "network/overview": {
+    "block-committed-title": "Blocks Committed",
+    "block-committed-description": "Number of blocks committed per day for the past 180 days",
+    "totalValidators": "Total Validators",
+    "activeValidators": "Active Validators",
+    "totalStaked": "Total Staked",
+    "totalSupply": "Total Supply",
+    "averageUptime": "Average Uptime",
+    "recentBlocks": "Recent Blocks",
+    "recentTransactions": "Recent Transactions"
+  },
   "demo": {
     "title": "Internationalization Demo",
     "description": "This is a demonstration of next-intl with English and Chinese support.",
