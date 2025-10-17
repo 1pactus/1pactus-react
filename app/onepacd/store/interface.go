@@ -2,7 +2,7 @@ package store
 
 import (
 	"github.com/frimin/1pactus-react/app/onepacd/store/data"
-	"github.com/frimin/1pactus-react/stored/storedriver"
+	"github.com/frimin/1pactus-react/store/storedriver"
 )
 
 type IMongo interface {
