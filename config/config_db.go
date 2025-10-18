@@ -32,3 +32,30 @@ func NewDefaultRedisConfig() *RedisConfig {
 		Db:          0,
 	}
 }
+
+type PostgresConfig struct {
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	Database    string `mapstructure:"database"`
+	Healthcheck int    `mapstructure:"healthcheck"`
+
+	MaxOpenConns    int `mapstructure:"max_open_conns"`
+	MaxIdleConns    int `mapstructure:"max_idle_conns"`
+	ConnMaxLifetime int `mapstructure:"conn_max_lifetime"`
+}
+
+func NewDefaultPostgresConfig() *PostgresConfig {
+	return &PostgresConfig{
+		Username:        "root",
+		Password:        "",
+		Host:            "localhost",
+		Port:            3306,
+		Database:        "game",
+		Healthcheck:     30,
+		MaxOpenConns:    25,
+		MaxIdleConns:    25,
+		ConnMaxLifetime: 300,
+	}
+}

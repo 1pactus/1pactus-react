@@ -43,7 +43,19 @@ func (s *DataGatherService) Run() {
 func (s *DataGatherService) StartGather() error {
 	s.log.Infof("start gather")
 	defer s.log.Infof("gather stopped")
-	cg := NewChainGather(s.log, s.config.GrpcServers)
+
+	/*
+		cg := NewChainGather(s.log, s.config.GrpcServers)
+
+		if err := cg.Connect(); err != nil {
+			return fmt.Errorf("failed to connect to grpc servers: %w", err)
+		}
+
+		if err := cg.FetchBlockchain(context.Background()); err != nil {
+			return fmt.Errorf("failed to fetch blockchain: %w", err)
+		}*/
+
+	cg := NewPgChainGather(s.log, s.config.GrpcServers)
 
 	if err := cg.Connect(); err != nil {
 		return fmt.Errorf("failed to connect to grpc servers: %w", err)
@@ -52,6 +64,19 @@ func (s *DataGatherService) StartGather() error {
 	if err := cg.FetchBlockchain(context.Background()); err != nil {
 		return fmt.Errorf("failed to fetch blockchain: %w", err)
 	}
+
+	/*if timeIndexes, err := store.Mongo.GetLastDaysTimeIndex(30); err == nil {
+		for _, timeIndex := range timeIndexes {
+			s.log.Infof("fetching global state for time index %d", timeIndex)
+		}
+	}*/
+
+	/*
+		if data, err := store.Mongo.GetUnbond(30); err == nil {
+			for k, v := range data {
+				s.log.Infof("unbond at time index %d: %d", k, v)
+			}
+		}*/
 
 	return nil
 }

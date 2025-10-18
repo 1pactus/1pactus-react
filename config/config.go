@@ -24,10 +24,11 @@ func NewDefaultAppConfig() *AppConfig {
 }
 
 type ConfigBase struct {
-	App   *AppConfig   `mapstructure:"app"`
-	Log   *log.Options `mapstructure:"log"`
-	Mongo *MongoConfig `mapstructure:"mongo"`
-	Redis *RedisConfig `mapstructure:"redis"`
+	App      *AppConfig      `mapstructure:"app"`
+	Log      *log.Options    `mapstructure:"log"`
+	Mongo    *MongoConfig    `mapstructure:"mongo"`
+	Redis    *RedisConfig    `mapstructure:"redis"`
+	Postgres *PostgresConfig `mapstructure:"postgres"`
 }
 
 func NewDefaultConfigBaseConfig() *ConfigBase {

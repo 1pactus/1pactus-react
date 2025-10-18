@@ -20,6 +20,13 @@ mongo:
   database: onepacd
   password:
   healthcheck: 20
+postgres:
+  username: onepacd
+  password: onepacd
+  host: localhost
+  port: 5432
+  database: onepacd
+  healthcheck: 30
 redis:
   addr: ${ONEPACD_REDIS_SERVER:-localhost:6379}
   password:

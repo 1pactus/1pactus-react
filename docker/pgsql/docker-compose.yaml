@@ -1,0 +1,22 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.22.1-pg17
+    container_name: timescaledb_container
+    
+    environment:
+      - POSTGRES_PASSWORD=onepacd
+      - POSTGRES_USER=onepacd
+      - POSTGRES_DB=onepacd
+      
+    ports:
+      - "5432:5432"
+      
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+      - ./postgres.conf:/var/lib/postgresql/data/postgresql.conf
+      
+    restart: unless-stopped
+
+volumes:
+  timescaledb-data:
+    driver: local

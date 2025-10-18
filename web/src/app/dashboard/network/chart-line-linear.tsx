@@ -98,6 +98,7 @@ export function ChartLineLinear({ data, title, description, displayLable: displa
               stroke={`var(--color-value)`}
               strokeWidth={2}
               dot={false}
+              isAnimationActive={false}
             />
           </LineChart>
         </ChartContainer>

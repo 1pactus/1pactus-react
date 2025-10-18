@@ -10,6 +10,10 @@ func Init(config *config.ConfigBase) error {
 		return err
 	}
 
+	if err := setupPostgres(config.Postgres); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -19,4 +23,14 @@ func setupMongo(conf *config.MongoConfig) (err error) {
 	})
 
 	return
+}
+
+func setupPostgres(conf *config.PostgresConfig) error {
+	if err := storedriver.PostgresGormStart("base", conf, []storedriver.IPostgresGormStore{
+		Postgres,
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }

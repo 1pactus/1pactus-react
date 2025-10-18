@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/frimin/1pactus-react/app/onepacd/service/webapi/model"
 	"github.com/frimin/1pactus-react/app/onepacd/store"
@@ -47,11 +48,16 @@ func SetupNetworkStatus(group *gin.RouterGroup) {
 			req.Days = 30 // default to 30 days
 		}
 
-		stats, err := store.Mongo.FetchNetworkGlobalStats(int64(req.Days))
+		//stats, err := store.Mongo.GetNetworkGlobalStats(int64(req.Days))
+
+		stats, err := store.Postgres.GetNetworkGlobalStats(int64(req.Days))
 
 		if err != nil {
 			httpResp.Code = model.Code_InternalError
+			return
 		}
+
+		slices.Reverse(stats)
 
 		httpResp.Lines = make([]*api.NetworkStatusData, 0, len(stats))
 
