@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/frimin/1pactus-react/config"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/config"
+	"github.com/1pactus/1pactus-react/log"
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -232,7 +232,6 @@ func (db *postgresGormImpl) monitorConnection() {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			// 获取底层的sql.DB来进行健康检查
 			sqlDB, err := db.db.DB()
 			if err != nil {
 				db.log.Errorf("failed to get underlying sql.DB: %v", err)

@@ -51,11 +51,11 @@ func NewDefaultPostgresConfig() *PostgresConfig {
 		Username:        "root",
 		Password:        "",
 		Host:            "localhost",
-		Port:            3306,
-		Database:        "game",
+		Port:            5432,
+		Database:        "db",
 		Healthcheck:     30,
-		MaxOpenConns:    25,
-		MaxIdleConns:    25,
+		MaxOpenConns:    32,
+		MaxIdleConns:    16,
 		ConnMaxLifetime: 300,
 	}
 }

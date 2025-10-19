@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/frimin/1pactus-react/app/onepacd/service/webapi/model"
-	"github.com/frimin/1pactus-react/app/onepacd/store"
-	"github.com/frimin/1pactus-react/log"
-	"github.com/frimin/1pactus-react/proto/gen/go/api"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi/model"
+	"github.com/1pactus/1pactus-react/app/onepacd/store"
+	"github.com/1pactus/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/proto/gen/go/api"
 	"github.com/gin-gonic/gin"
 )
 

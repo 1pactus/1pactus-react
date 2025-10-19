@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/frimin/1pactus-react/config"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/config"
+	"github.com/1pactus/1pactus-react/log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

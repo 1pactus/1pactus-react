@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/frimin/1pactus-react/app/onepacd/store/data"
+	"github.com/1pactus/1pactus-react/app/onepacd/store/data"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

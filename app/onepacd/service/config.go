@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/frimin/1pactus-react/app/onepacd/service/gather"
-	"github.com/frimin/1pactus-react/app/onepacd/service/webapi"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/gather"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi"
 )
 
 type Config struct {

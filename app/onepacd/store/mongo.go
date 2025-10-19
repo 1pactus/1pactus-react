@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/frimin/1pactus-react/config"
-	"github.com/frimin/1pactus-react/store/storedriver"
+	"github.com/1pactus/1pactus-react/config"
+	"github.com/1pactus/1pactus-react/store/storedriver"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

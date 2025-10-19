@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/frimin/1pactus-react/proto/gen/go/api"
+	"github.com/1pactus/1pactus-react/proto/gen/go/api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

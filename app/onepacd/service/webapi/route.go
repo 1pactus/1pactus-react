@@ -3,7 +3,7 @@ package webapi
 import (
 	"net/http"
 
-	"github.com/frimin/1pactus-react/app/onepacd/service/webapi/handler"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi/handler"
 	"github.com/gin-gonic/gin"
 )
 

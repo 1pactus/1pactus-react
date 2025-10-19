@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/frimin/1pactus-react/app/onepacd/service/webapi/middleware"
-	"github.com/frimin/1pactus-react/lifecycle"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi/middleware"
+	"github.com/1pactus/1pactus-react/lifecycle"
+	"github.com/1pactus/1pactus-react/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )

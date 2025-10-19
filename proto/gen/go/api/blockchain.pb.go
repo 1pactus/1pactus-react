@@ -7,11 +7,12 @@
 package api
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -131,7 +132,7 @@ func (x *NetworkStatusData) GetActiveAccount() int64 {
 
 type GetNetworkHealthRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Days          int32                  `protobuf:"varint,1,opt,name=days,proto3" json:"days,omitempty" form:"days"`        // @gotags: form:"days"
+	Days          int32                  `protobuf:"varint,1,opt,name=days,proto3" json:"days,omitempty" form:"days"`            // @gotags: form:"days"
 	Datatype      string                 `protobuf:"bytes,2,opt,name=datatype,proto3" json:"datatype,omitempty" form:"datatype"` // @gotags: form:"datatype"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -263,7 +264,7 @@ const file_api_blockchain_proto_rawDesc = "" +
 	"\x18GetNetworkHealthResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x10\n" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\x12,\n" +
-	"\x05lines\x18\x03 \x03(\v2\x16.api.NetworkStatusDataR\x05linesB3Z1github.com/frimin/1pactus-react/backend/proto/apib\x06proto3"
+	"\x05lines\x18\x03 \x03(\v2\x16.api.NetworkStatusDataR\x05linesB3Z1github.com/1pactus/1pactus-react/backend/proto/apib\x06proto3"
 
 var (
 	file_api_blockchain_proto_rawDescOnce sync.Once

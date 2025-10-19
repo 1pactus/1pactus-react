@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/frimin/1pactus-react/app/onepacd/store/data"
+	"github.com/1pactus/1pactus-react/app/onepacd/store/data"
 )
 
 type DBCommit struct {

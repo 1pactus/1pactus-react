@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/frimin/1pactus-react/config"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/config"
+	"github.com/1pactus/1pactus-react/log"
 
 	"time"
 

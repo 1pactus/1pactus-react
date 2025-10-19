@@ -1,6 +1,6 @@
 package model
 
-import "github.com/frimin/1pactus-react/proto/gen/go/api"
+import "github.com/1pactus/1pactus-react/proto/gen/go/api"
 
 type GlobalState struct {
 	TimeIndex         int64 `gorm:"primaryKey;uniqueIndex:idx_time_index;not null"`

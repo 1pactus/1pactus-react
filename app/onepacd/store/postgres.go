@@ -4,8 +4,8 @@ import (
 	_ "embed"
 	"time"
 
-	"github.com/frimin/1pactus-react/app/onepacd/store/model"
-	"github.com/frimin/1pactus-react/store/storedriver"
+	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
+	"github.com/1pactus/1pactus-react/store/storedriver"
 )
 
 const (

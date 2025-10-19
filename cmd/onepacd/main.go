@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/frimin/1pactus-react/app/onepacd"
+	"github.com/1pactus/1pactus-react/app/onepacd"
 	"github.com/urfave/cli/v2"
 )
 

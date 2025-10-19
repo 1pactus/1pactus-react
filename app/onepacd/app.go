@@ -7,12 +7,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/frimin/1pactus-react/app/onepacd/service/dummy"
-	gather "github.com/frimin/1pactus-react/app/onepacd/service/gather"
-	"github.com/frimin/1pactus-react/app/onepacd/service/webapi"
-	"github.com/frimin/1pactus-react/app/onepacd/store"
-	"github.com/frimin/1pactus-react/lifecycle"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/dummy"
+	gather "github.com/1pactus/1pactus-react/app/onepacd/service/gather"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi"
+	"github.com/1pactus/1pactus-react/app/onepacd/store"
+	"github.com/1pactus/1pactus-react/lifecycle"
+	"github.com/1pactus/1pactus-react/log"
 )
 
 const (

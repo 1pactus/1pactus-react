@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/log"
 
 	"github.com/a8m/envsubst"
 	"github.com/spf13/viper"
@@ -33,10 +33,11 @@ type ConfigBase struct {
 
 func NewDefaultConfigBaseConfig() *ConfigBase {
 	return &ConfigBase{
-		App:   NewDefaultAppConfig(),
-		Log:   log.NewDefaultOptions(),
-		Mongo: NewDefaultMongoConfig(),
-		Redis: NewDefaultRedisConfig(),
+		App:      NewDefaultAppConfig(),
+		Log:      log.NewDefaultOptions(),
+		Mongo:    NewDefaultMongoConfig(),
+		Redis:    NewDefaultRedisConfig(),
+		Postgres: NewDefaultPostgresConfig(),
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/log"
 	"github.com/gin-gonic/gin"
 )
 

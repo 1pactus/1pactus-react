@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/frimin/1pactus-react/app/onepacd/service/gather/constants"
-	"github.com/frimin/1pactus-react/app/onepacd/store"
-	db "github.com/frimin/1pactus-react/app/onepacd/store"
-	"github.com/frimin/1pactus-react/app/onepacd/store/model"
-	"github.com/frimin/1pactus-react/log"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/gather/constants"
+	"github.com/1pactus/1pactus-react/app/onepacd/store"
+	db "github.com/1pactus/1pactus-react/app/onepacd/store"
+	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
+	"github.com/1pactus/1pactus-react/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 

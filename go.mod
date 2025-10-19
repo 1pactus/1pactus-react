@@ -1,4 +1,4 @@
-module github.com/frimin/1pactus-react
+module github.com/1pactus/1pactus-react
 
 go 1.24.7
 

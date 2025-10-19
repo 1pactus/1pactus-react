@@ -1,8 +1,8 @@
 package onepacd
 
 import (
-	"github.com/frimin/1pactus-react/app/onepacd/service"
-	"github.com/frimin/1pactus-react/config"
+	"github.com/1pactus/1pactus-react/app/onepacd/service"
+	"github.com/1pactus/1pactus-react/config"
 )
 
 type Config struct {
