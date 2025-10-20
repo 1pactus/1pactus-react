@@ -2,15 +2,18 @@ package gather
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/1pactus/1pactus-react/lifecycle"
 	"github.com/1pactus/1pactus-react/log"
+	"github.com/robfig/cron/v3"
 )
 
 type DataGatherService struct {
 	*lifecycle.ServiceLifeCycle
 	log    log.ILogger
 	config *Config
+	cron   *cron.Cron
 }
 
 func NewGatherService(appLifeCycle *lifecycle.AppLifeCycle, config *Config) *DataGatherService {
@@ -18,6 +21,7 @@ func NewGatherService(appLifeCycle *lifecycle.AppLifeCycle, config *Config) *Dat
 		ServiceLifeCycle: lifecycle.NewServiceLifeCycle(appLifeCycle),
 		log:              log.WithKv("service", "gather"),
 		config:           config,
+		cron:             cron.New(cron.WithLocation(time.UTC)),
 	}
 }
 
@@ -25,23 +29,52 @@ func (s *DataGatherService) Run() {
 	defer s.LifeCycleDead(true)
 	defer s.log.Info("BYE")
 
+	gatherChan := make(chan struct{}, 2)
+
+	defer close(gatherChan)
+
 	s.log.Info("HI")
 
-	if err := s.StartGather(s.Done()); err != nil {
-		s.log.Errorf("failed to start gather: %v", err)
+	_, err := s.cron.AddFunc("10 0 * * *", func() {
+		s.log.Info("starting scheduled task at UTC 00:10")
+		gatherChan <- struct{}{}
+	})
+	if err != nil {
+		s.log.Errorf("failed to add cron job: %v", err)
 		return
 	}
 
-	select {
-	case <-s.Done():
-		s.log.Info("data collect received done signal")
-		return
+	s.cron.Start()
+	defer s.cron.Stop()
+
+	gatherChan <- struct{}{}
+
+	go s.runGatherWorker(gatherChan)
+
+	<-s.Done()
+	s.log.Info("data collect received done signal")
+}
+
+func (s *DataGatherService) runGatherWorker(gatherChan <-chan struct{}) {
+	s.log.Infof("gather waiting started")
+	defer s.log.Infof("gather waiting stopped")
+	for range gatherChan {
+		err := s.startGatherBlockchain(s.Done())
+		if err != nil {
+			s.log.Errorf("%v", err)
+		}
 	}
 }
 
-func (s *DataGatherService) StartGather(dieChan <-chan struct{}) error {
-	s.log.Infof("start gather")
-	defer s.log.Infof("gather stopped")
+func (s *DataGatherService) startGatherBlockchain(dieChan <-chan struct{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("startGather panic: %v", r)
+		}
+	}()
+
+	s.log.Infof("blockchain gather started")
+	defer s.log.Infof("blockchain gather stopped")
 
 	/*
 		cg := NewChainGather(s.log, s.config.GrpcServers)
