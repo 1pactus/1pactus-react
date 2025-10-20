@@ -107,7 +107,7 @@ export const Disabled = {
 
 // 带图标的按钮（使用 Lucide React 图标）
 export const WithIcon = {
-  render: (args: any) => (
+  render: (args: Record<string, unknown>) => (
     <Button {...args}>
       <svg
         xmlns="http://www.w3.org/2000/svg"

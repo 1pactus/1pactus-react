@@ -59,7 +59,7 @@ export function NavMain({ items, currentPath }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      {/*<SidebarGroupLabel>Platform</SidebarGroupLabel>*/}
       <SidebarMenu>
         {items.map((item) => {
           const isParentActive = currentPath === item.url

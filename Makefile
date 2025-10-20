@@ -32,20 +32,37 @@ proto:
 
 tidy:
 	go mod tidy -C .
+	npm install pnpm -g
+	cd web && pnpm install
 
-build: $(foreach app,$(APPS),build-$(app))
+build: $(foreach app,$(APPS),build-$(app)) | cp-yaml
 
 build-%:
 	go build -C ./cmd/$* -ldflags "-s -w" -o $(BUILD_OUTPUT)/$*$(EXE)
+	
+build-web:
+	cd web && pnpm run build
+
+build-docker:
+	docker build -f docker/Dockerfile.backend \
+		$(if $(HTTP_PROXY),--build-arg HTTP_PROXY=$(HTTP_PROXY),) \
+		$(if $(HTTPS_PROXY),--build-arg HTTPS_PROXY=$(HTTPS_PROXY),) \
+		$(if $(NO_PROXY),--build-arg NO_PROXY=$(NO_PROXY),) \
+		-t onepacd:latest . 
+
+build-docker-web:
+	docker build -f docker/Dockerfile.web \
+		$(if $(HTTP_PROXY),--build-arg HTTP_PROXY=$(HTTP_PROXY),) \
+		$(if $(HTTPS_PROXY),--build-arg HTTPS_PROXY=$(HTTPS_PROXY),) \
+		$(if $(NO_PROXY),--build-arg NO_PROXY=$(NO_PROXY),) \
+		-t onepacd-web:latest .
 
 cp-yaml:
 	$(foreach file,$(YAML_CFGS),cp app/$(file)/config.yaml $(BUILD_OUTPUT)/config.$(file).yaml;)
-	cp app/common.yaml $(BUILD_OUTPUT)/config.common.yaml
 
 clean:
 	$(foreach app,$(APPS),rm $(BUILD_OUTPUT)/$(app)$(EXE);)
 	$(foreach file,$(YAML_CFGS),rm $(BUILD_OUTPUT)/config.$(file).yaml;)
 
-	#rm $(BUILD_OUTPUT)/config.common.yaml
 
-.PHONY: proto dev-tools build cp-yaml clean tidy
+.PHONY: proto dev-tools build cp-yaml clean tidy build-docker build-docker-web build-web

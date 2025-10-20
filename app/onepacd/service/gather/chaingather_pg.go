@@ -1,7 +1,6 @@
 package gather
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -15,23 +14,30 @@ import (
 )
 
 type PgChainGather struct {
-	grpc *grpcClient
-	log  log.ILogger
+	grpc        *grpcClient
+	log         log.ILogger
+	grpcServers []string
 }
 
 func NewPgChainGather(log log.ILogger, grpcServers []string) *PgChainGather {
 	p := &PgChainGather{
-		grpc: newGrpcClient(time.Second*10, grpcServers),
-		log:  log,
+		grpc:        newGrpcClient(time.Second*10, grpcServers),
+		log:         log,
+		grpcServers: grpcServers,
 	}
 
 	return p
 }
 
 func (p *PgChainGather) Connect() error {
+	for _, server := range p.grpcServers {
+		p.log.Infof("trying to connect to gRPC server: %s", server)
+	}
+
 	err := p.grpc.connect()
 
 	if err != nil {
+
 		return err
 	}
 
@@ -92,7 +98,7 @@ func (p *PgChainGather) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, ch
 	return commitChan, errorChan
 }
 
-func (p *PgChainGather) FetchBlockchain(ctx context.Context) error {
+func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 	_, err := p.grpc.getBlockchainInfo()
 	if err != nil {
 		return err
@@ -147,9 +153,9 @@ func (p *PgChainGather) FetchBlockchain(ctx context.Context) error {
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-dieChan:
 			p.log.Warn("Context cancelled, stopping FetchBlockchain")
-			return ctx.Err()
+			return fmt.Errorf("cancelled")
 		case err = <-commitErrChain:
 			p.log.Errorf("commit error: %v", err)
 			return err

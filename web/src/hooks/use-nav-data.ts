@@ -16,6 +16,7 @@ export function useNavData() {
   const t = useTranslations('navigation');
 
   return {
+    homeUrl: NavPageRoot,
     navMain: [
       {
         title: t('network'),
@@ -33,6 +34,7 @@ export function useNavData() {
           },*/
         ],
       },
+      /*
       {
         title: t('trends'),
         url: `#`,
@@ -87,7 +89,7 @@ export function useNavData() {
         title: t('publicAddresses'),
         url: `${NavPageRoot}/public_addresses`,
         icon: UserRoundSearch,
-      }
+      }*/
     ],
     navSecondary: [
       {

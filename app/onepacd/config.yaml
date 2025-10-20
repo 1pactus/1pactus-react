@@ -21,11 +21,11 @@ mongo:
   password:
   healthcheck: 20
 postgres:
-  username: onepacd
-  password: onepacd
-  host: localhost
-  port: 5432
-  database: onepacd
+  username: ${ONEPACD_POSTGRES_USERNAME:-onepacd}
+  password: ${ONEPACD_POSTGRES_PASSWORD:-onepacd}
+  host: ${ONEPACD_POSTGRES_HOST:-localhost}
+  port: ${ONEPACD_POSTGRES_PORT:-5432}
+  database: ${ONEPACD_POSTGRES_DBNAME:-onepacd}
 redis:
   addr: ${ONEPACD_REDIS_SERVER:-localhost:6379}
   password:
@@ -33,4 +33,7 @@ redis:
   healthcheck: 10
 service:
   webapi:
-    http_listen: ":8080"
+    http_listen: ":13665"
+  gather:
+    grpc_servers: 
+      - ${ONEPACD_GATHER_GRPC_SERVER:-localhost:50051}

@@ -6,6 +6,14 @@
     "chinese": "中文",
     "home": "首页"
   },
+  "home": {
+    "title": "1PACTUS 图表",
+    "description": "欢迎来到 Pactus Charts。本网站提供 PACTUS 链上数据的基本分析，供您参考。按日更新的图表会在 UTC 时间 00:10 之后进行，并将前一天的链上行为纳入分析。",
+    "disclaimer-title": "免责声明",
+    "disclaimer-content": "本网站并非 PACTUS 官方统计平台，仅作为 PACTUS 链上数据的补充展示。本网站完全由社区成员开发和维护。我们无法保证长期维护和更新。对于因网站维护中断而产生的任何问题，我们概不负责。本网站不构成投资建议。我们不保证任何数据或图表的准确性。任何个人或组织均不认可本网站。所有数据和图表可能因程序错误或统计策略问题而被手动更正。",
+    "updates-title": "更新日志",
+    "updates-content-0": "2025.10.20 - 基础网络状态图表"
+  },
   "navigation": {
     "dashboard": "仪表板",
     "settings": "设置",
@@ -34,31 +42,18 @@
     "block-committed-description": "每天提交的区块数量",
     "transactions-committed-title": "已提交的交易数量",
     "transactions-committed-description": "每天提交的交易数量",
-
     "stake-title": "总质押量",
-    "stake-description": "每天的总质押量",
-
+    "stake-description": "每天的总质押量变化",
     "supply-title": "总供应量",
-    "supply-description": "每天的总供应量",
-
+    "supply-description": "每天的总供应量变化",
     "circulating-supply-title": "流通供应量",
-    "circulating-supply-description": "每天的流通供应量",
-
+    "circulating-supply-description": "每天的流通供应量变化",
     "fee-accumulation-title": "费用累计",
     "fee-accumulation-description": "每天累计的费用",
-
     "active-validators-title": "活跃验证者数量",
     "active-validators-description": "每天活跃的验证者数量",
     "active-accounts-title": "活跃账户数量",
-    "active-accounts-description": "每天活跃的账户数量",
-
-    "totalValidators": "总验证者数",
-    "activeValidators": "活跃验证者数",
-    "totalStaked": "总质押量",
-    "totalSupply": "总供应量",
-    "averageUptime": "平均在线率",
-    "recentBlocks": "最近区块",
-    "recentTransactions": "最近交易"
+    "active-accounts-description": "每天活跃的账户数量"
   },
   "demo": {
     "title": "国际化演示",

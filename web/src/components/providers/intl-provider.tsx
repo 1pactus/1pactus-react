@@ -11,7 +11,7 @@ interface IntlProviderProps {
 
 export function IntlProvider({ children }: IntlProviderProps) {
   const { locale, isLoading: localeLoading } = useLocale();
-  const [messages, setMessages] = useState<any>(null);
+  const [messages, setMessages] = useState<Record<string, unknown> | null>(null);
   const [messagesLoading, setMessagesLoading] = useState(true);
 
   useEffect(() => {

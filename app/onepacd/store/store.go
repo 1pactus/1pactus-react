@@ -6,9 +6,10 @@ import (
 )
 
 func Init(config *config.ConfigBase) error {
-	if err := setupMongo(config.Mongo); err != nil {
-		return err
-	}
+	/*
+		if err := setupMongo(config.Mongo); err != nil {
+			return err
+		}*/
 
 	if err := setupPostgres(config.Postgres); err != nil {
 		return err

@@ -1,0 +1,70 @@
+services:
+  web:
+    image: onepacd-web:latest
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile.web
+      args:
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: web
+    ports:
+      - "80:80"
+    restart: unless-stopped
+  backend: 
+    image: onepacd:latest
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile.backend
+      args:
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: backend
+    ports:
+      - "13665:13665"
+    environment:
+      - GIN_MODE=release
+      - ONEPACD_POSTGRES_HOST=db
+      - ONEPACD_POSTGRES_PORT=5432
+      - ONEPACD_POSTGRES_PASSWORD=${ONEPACD_POSTGRES_PASSWORD:-onepacd}
+      - ONEPACD_POSTGRES_DBNAME=onepacd
+      - ONEPACD_GATHER_GRPC_SERVER=pactus:50051
+    depends_on:
+      - db
+    restart: unless-stopped
+  pactus:
+    image: pactus/pactus
+    container_name: pactus
+    restart: always
+    ports:
+      - "21888:21888"      # TCP
+      - "21888:21888/udp"  # UDP
+      - "50051:50051"      # gRPC port
+      - "8080:8080"        # HTTP port
+    volumes:
+      - pactus-data:/root/pactus
+      - ./docker/pactus-entrypoint.sh:/pactus-entrypoint.sh:ro
+    environment:
+      - PACTUS_WALLET_PASSWORD=${PACTUS_WALLET_PASSWORD:-onepactus}
+    entrypoint: ["/bin/sh", "/pactus-entrypoint.sh"]
+  db:
+    image: timescale/timescaledb:2.22.1-pg17
+    container_name: db
+    environment:
+      - POSTGRES_PASSWORD=${ONEPACD_POSTGRES_PASSWORD:-onepacd}
+      - POSTGRES_USER=onepacd
+      - POSTGRES_DB=onepacd
+    ports:
+      - "5432:5432"
+    volumes:
+      - onepacd-data:/var/lib/postgresql/data
+      #- ./postgres.conf:/var/lib/postgresql/data/postgresql.conf
+    restart: unless-stopped
+
+volumes:
+  onepacd-data:
+    driver: local
+  pactus-data:
+    driver: local

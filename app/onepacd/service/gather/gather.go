@@ -1,7 +1,6 @@
 package gather
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/1pactus/1pactus-react/lifecycle"
@@ -28,7 +27,7 @@ func (s *DataGatherService) Run() {
 
 	s.log.Info("HI")
 
-	if err := s.StartGather(); err != nil {
+	if err := s.StartGather(s.Done()); err != nil {
 		s.log.Errorf("failed to start gather: %v", err)
 		return
 	}
@@ -40,7 +39,7 @@ func (s *DataGatherService) Run() {
 	}
 }
 
-func (s *DataGatherService) StartGather() error {
+func (s *DataGatherService) StartGather(dieChan <-chan struct{}) error {
 	s.log.Infof("start gather")
 	defer s.log.Infof("gather stopped")
 
@@ -61,7 +60,7 @@ func (s *DataGatherService) StartGather() error {
 		return fmt.Errorf("failed to connect to grpc servers: %w", err)
 	}
 
-	if err := cg.FetchBlockchain(context.Background()); err != nil {
+	if err := cg.FetchBlockchain(dieChan); err != nil {
 		return fmt.Errorf("failed to fetch blockchain: %w", err)
 	}
 

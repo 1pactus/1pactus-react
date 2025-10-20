@@ -6,6 +6,14 @@
     "chinese": "中文",
     "home": "Home"
   },
+  "home": {
+    "title": "1PACTUS Charts",
+    "description": "Welcome to Pactus Charts. This website provides basic analysis of PACTUS on-chain data for your reference. The daily updated charts will be conducted after 00:10 UTC and will incorporate the on-chain behavior of the previous day into the analysis.",
+    "disclaimer-title": "Disclaimer",
+    "disclaimer-content": "This website is not the official statistics platform of PACTUS, but a supplementary display of PACTUS on-chain data. This website is completely developed and maintained by community members. We cannot guarantee long-term maintenance and updates. We are not responsible for any issues arising from website maintenance interruptions. This website does not constitute investment advice. We do not guarantee the accuracy of any data or charts. No individual or organization recognizes this website. All data and charts may be manually corrected due to program errors or statistical policy issues.",
+    "updates-title": "Update Log",
+    "updates-content-0": "2025.10.20 - Basic Network Status Chart"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "settings": "Settings",
@@ -31,14 +39,21 @@
   },
   "network/overview": {
     "block-committed-title": "Blocks Committed",
-    "block-committed-description": "Number of blocks committed per day for the past 180 days",
-    "totalValidators": "Total Validators",
-    "activeValidators": "Active Validators",
-    "totalStaked": "Total Staked",
-    "totalSupply": "Total Supply",
-    "averageUptime": "Average Uptime",
-    "recentBlocks": "Recent Blocks",
-    "recentTransactions": "Recent Transactions"
+    "block-committed-description": "Number of blocks committed per day",
+    "transactions-committed-title": "Transactions Committed",
+    "transactions-committed-description": "Number of transactions committed per day",
+    "stake-title": "Total Stake",
+    "stake-description": "Daily changes in total stake amount",
+    "supply-title": "Total Supply",
+    "supply-description": "Daily changes in total supply",
+    "circulating-supply-title": "Circulating Supply",
+    "circulating-supply-description": "Daily changes in circulating supply",
+    "fee-accumulation-title": "Fee Accumulation",
+    "fee-accumulation-description": "Accumulated fees per day",
+    "active-validators-title": "Active Validators",
+    "active-validators-description": "Number of active validators per day",
+    "active-accounts-title": "Active Accounts",
+    "active-accounts-description": "Number of active accounts per day" 
   },
   "demo": {
     "title": "Internationalization Demo",

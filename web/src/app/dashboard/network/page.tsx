@@ -7,9 +7,18 @@ import { ChartLineLinear, ChartData } from './chart-line-linear';
 import { GetNetworkHealthRequest, GetNetworkHealthResponse, NetworkStatusData } from '@/lib/proto/api/blockchain'
 import React from 'react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_MODE = process.env.NEXT_PUBLIC_API_MODE;
 const ONE_PAC = 1000000000
+
+// 处理 API_BASE_URL,如果是相对路径则拼接当前域名
+const getApiBaseUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  if (envUrl.startsWith('/')) {
+    // 如果是相对路径,拼接当前页面的 origin (协议 + 域名 + 端口)
+    return typeof window !== 'undefined' ? `${window.location.origin}${envUrl}` : envUrl;
+  }
+  return envUrl;
+};
 
 export type NetworkStatutsChartData = Array<{ 
     date: string; 
@@ -25,7 +34,6 @@ export type NetworkStatutsChartData = Array<{
   }>
 
 export default function NetworkOverviewPage() {
-  const t = useTranslations('navigation');
   const [chartData, setChartData] = React.useState<NetworkStatutsChartData>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -38,7 +46,8 @@ export default function NetworkOverviewPage() {
         setIsLoading(true);
         setError(null);
 
-        const jsonPayload = GetNetworkHealthRequest.toJSON(reqPayload) as any;
+        const apiBaseUrl = getApiBaseUrl();
+        const jsonPayload = GetNetworkHealthRequest.toJSON(reqPayload) as Record<string, unknown>;
         const params = new URLSearchParams();
 
         Object.entries(jsonPayload).forEach(([key, value]) => {
@@ -47,7 +56,7 @@ export default function NetworkOverviewPage() {
           }
         });
 
-        const response = await fetch(`${API_BASE_URL}/network_status?${params}`, {
+        const response = await fetch(`${apiBaseUrl}/network_status?${params}`, {
           method: 'GET',
         });
 
@@ -55,7 +64,7 @@ export default function NetworkOverviewPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        let ret: GetNetworkHealthResponse = null as any;
+        let ret: GetNetworkHealthResponse | null = null;
 
         switch (reqPayload.datatype) {
           case 'pb':

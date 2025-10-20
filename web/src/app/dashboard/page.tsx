@@ -1,10 +1,25 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardDescription,
+  CardAction,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
+
+import { useTranslations } from 'next-intl';
 
 export default function Page() {
+  const t = useTranslations('home');
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      {/*
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         <div className="bg-muted/50 aspect-video rounded-xl" />
         <div className="bg-muted/50 aspect-video rounded-xl" />
@@ -21,26 +36,48 @@ export default function Page() {
             </Link>
           </CardContent>
         </Card>
-      </div>
+      </div>*/}
       <Card className="min-h-[100vh] flex-1 md:min-h-min">
         <CardHeader>
-          <CardTitle>Multi-language Sidebar Demo</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
-            The sidebar navigation is now fully internationalized! Try switching between English and Chinese using the language switcher in the top-right corner.
+            {t("description")}
           </p>
-          <p className="text-muted-foreground">
-            <strong>Features:</strong>
+        </CardContent>
+
+        <CardHeader>
+          <CardTitle>{t("disclaimer-title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            {t("disclaimer-content")}
           </p>
+        </CardContent>
+        <CardHeader>
+          <CardTitle>{t("updates-title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
           <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-2">
-            <li>Sidebar navigation titles translate instantly</li>
-            <li>Breadcrumb navigation is also localized</li>
-            <li>Language preference is saved in localStorage</li>
-            <li>No page refresh required for language switching</li>
+            <li>{t("updates-content-0")}</li>
           </ul>
         </CardContent>
       </Card>
+
+      {/*<Card>
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+    <CardDescription>Card Description</CardDescription>
+    <CardAction>Card Action</CardAction>
+  </CardHeader>
+  <CardContent>
+    <p>Card Content</p>
+  </CardContent>
+  <CardFooter>
+    <p>Card Footer</p>
+  </CardFooter>
+</Card>*/}
     </div>
   )
 }
