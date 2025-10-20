@@ -12,6 +12,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 import React from 'react';
 
@@ -146,8 +147,6 @@ export default function NetworkOverviewPage() {
             throw new Error(`Unsupported datatype: ${reqPayload.datatype}`);
         }
 
-        console.log('Network health data:', ret);
-
         if (ret.lines && ret.lines.length > 0) {
           const transformedData = ret.lines.map((item: NetworkStatusData) => ({
             date: new Date(item.timeIndex * 1000).toISOString().split('T')[0],
@@ -180,14 +179,10 @@ export default function NetworkOverviewPage() {
       <>
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center p-4">
-          <Card>
-            <CardContent className="flex items-center justify-center max-w-2xl">
-              <div className="text-center">
-                {/*<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>*/}
-                <p className="text-muted-foreground">{tCommon('loading')}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="w-full max-w-md space-y-4">
+            <p className="text-center text-muted-foreground">{tCommon('loading')}</p>
+            <Progress value={undefined} className="w-full" />
+          </div>
         </div>
       ) : error ? (
         <div className="flex flex-1 items-center justify-center p-4">
@@ -202,7 +197,7 @@ export default function NetworkOverviewPage() {
         </div>
       ) : (
         <>
-        <ChartLineContents chartData={chartData} />
+          <ChartLineContents chartData={chartData} />
         </>
       )}
     </>
