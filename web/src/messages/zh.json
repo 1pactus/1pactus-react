@@ -4,7 +4,11 @@
     "language": "语言",
     "english": "English",
     "chinese": "中文",
-    "home": "首页"
+    "home": "首页",
+    "failed-load": "加载数据失败。",
+    "try-later": "请稍后再试",
+    "retry": "重试",
+    "loading": "加载中..."
   },
   "home": {
     "title": "1PACTUS 图表",

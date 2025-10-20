@@ -4,7 +4,11 @@
     "language": "Language",
     "english": "English",
     "chinese": "中文",
-    "home": "Home"
+    "home": "Home",
+    "failed-load": "Failed to load data.",
+    "try-later": "Please try again later",
+    "retry": "Retry",
+    "loading": "Loading..."
   },
   "home": {
     "title": "1PACTUS Charts",
