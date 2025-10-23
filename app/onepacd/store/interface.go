@@ -4,6 +4,8 @@ import (
 	"github.com/1pactus/1pactus-react/app/onepacd/store/data"
 	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
 	"github.com/1pactus/1pactus-react/store/storedriver"
+	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+	"github.com/segmentio/kafka-go"
 )
 
 type IMongo interface {
@@ -26,7 +28,16 @@ type IPostgres interface {
 	Commit(commitContext PgCommitContext) error
 }
 
+type IKafka interface {
+	storedriver.IKafkaStore
+
+	SendBlock(block *pactus.GetBlockResponse) error
+	ConsumeMessages(topic string, handler func(kafka.Message) error) error
+	GetLastBlockHeight() (int64, error)
+}
+
 var (
 	Mongo    IMongo    = &mongoStore{}
 	Postgres IPostgres = &postgresStore{}
+	Kafka    IKafka    = &kafkaStore{}
 )

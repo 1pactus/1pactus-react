@@ -30,7 +30,7 @@ services:
       - ONEPACD_POSTGRES_PORT=5432
       - ONEPACD_POSTGRES_PASSWORD=${ONEPACD_POSTGRES_PASSWORD:-onepacd}
       - ONEPACD_POSTGRES_DBNAME=onepacd
-      - ONEPACD_GATHER_GRPC_SERVER=pactus:50051
+      - ONEPACD_PACTUS_GRPC_SERVER=pactus:50051
     depends_on:
       - db
     restart: unless-stopped

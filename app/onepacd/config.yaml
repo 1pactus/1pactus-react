@@ -36,4 +36,21 @@ service:
     http_listen: ":13665"
   gather:
     grpc_servers: 
-      - ${ONEPACD_GATHER_GRPC_SERVER:-localhost:50051}
+      - ${ONEPACD_PACTUS_GRPC_SERVER:-localhost:50051}
+  chainextract:
+    grpc_servers: 
+      - ${ONEPACD_PACTUS_GRPC_SERVER:-localhost:50051}
+kafka:
+  enable: true
+  brokers:
+    - "localhost:9092"
+  consumer_group: "onepacd-group"
+  auto_create_topics: true
+  default_partitions: 1
+  default_replication_factor: 1
+  healthcheck: 30
+  sasl:
+    enabled: false
+    mechanism: "PLAIN"
+    username: ""
+    password: ""

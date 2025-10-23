@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/1pactus/1pactus-react/app/onepacd/service/dummy"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract"
 	gather "github.com/1pactus/1pactus-react/app/onepacd/service/gather"
 	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
@@ -21,19 +21,19 @@ const (
 )
 
 var (
-	dummyService *dummy.DummyService
-	dataCollect  *gather.DataGatherService
-	webApi       *webapi.WebApiService
+	dataCollect         *gather.DataGatherService
+	webApi              *webapi.WebApiService
+	chainExtractService *chainextract.ChainExtractService
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
-	//dummyService = dummy.NewDummyService(appLifeCycle)
 	dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather)
 	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
+	chainExtractService = chainextract.NewChainExtractService(appLifeCycle, conf.Service.ChainExtract, conf.Kafka.Enable)
 
-	//appLifeCycle.WatchServiceLifeCycle(dummyService.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
+	appLifeCycle.WatchServiceLifeCycle(chainExtractService.ServiceLifeCycle)
 
 	return nil
 }
@@ -42,6 +42,7 @@ func RunServices() {
 	//go dummyService.Run()
 	go dataCollect.Run()
 	go webApi.Run()
+	go chainExtractService.Run()
 }
 
 func Run() {

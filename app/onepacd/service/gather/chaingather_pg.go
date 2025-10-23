@@ -14,14 +14,14 @@ import (
 )
 
 type PgChainGather struct {
-	grpc        *grpcClient
+	grpc        *GrpcClient
 	log         log.ILogger
 	grpcServers []string
 }
 
 func NewPgChainGather(log log.ILogger, grpcServers []string) *PgChainGather {
 	p := &PgChainGather{
-		grpc:        newGrpcClient(time.Second*10, grpcServers),
+		grpc:        NewGrpcClient(time.Second*10, grpcServers),
 		log:         log,
 		grpcServers: grpcServers,
 	}
@@ -34,7 +34,7 @@ func (p *PgChainGather) Connect() error {
 		p.log.Infof("trying to connect to gRPC server: %s", server)
 	}
 
-	err := p.grpc.connect()
+	err := p.grpc.Connect()
 
 	if err != nil {
 
@@ -99,7 +99,7 @@ func (p *PgChainGather) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, ch
 }
 
 func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
-	_, err := p.grpc.getBlockchainInfo()
+	_, err := p.grpc.GetBlockchainInfo()
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 		p.log.Infof("top block height: %v", height)
 	}
 
-	blockchainInfo, err := p.grpc.getBlockchainInfo()
+	blockchainInfo, err := p.grpc.GetBlockchainInfo()
 
 	if err != nil {
 		return fmt.Errorf("getBlockchainInfo failed: %v", err)
@@ -171,7 +171,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 				return nil
 			}
 
-			block, err := p.grpc.getBlock(uint32(height), pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
+			block, err := p.grpc.GetBlock(uint32(height), pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
 
 			if err != nil {
 				p.log.Errorf("getBlock failed: %v", err.Error())

@@ -59,3 +59,39 @@ func NewDefaultPostgresConfig() *PostgresConfig {
 		ConnMaxLifetime: 300,
 	}
 }
+
+type KafkaConfig struct {
+	Enable                   bool       `mapstructure:"enable"`
+	Brokers                  []string   `mapstructure:"brokers"`
+	ConsumerGroup            string     `mapstructure:"consumer_group"`
+	AutoCreateTopics         bool       `mapstructure:"auto_create_topics"`
+	DefaultPartitions        int        `mapstructure:"default_partitions"`
+	DefaultReplicationFactor int        `mapstructure:"default_replication_factor"`
+	Healthcheck              int        `mapstructure:"healthcheck"`
+	SASL                     SASLConfig `mapstructure:"sasl"`
+}
+
+type SASLConfig struct {
+	Enabled   bool   `mapstructure:"enabled"`
+	Mechanism string `mapstructure:"mechanism"`
+	Username  string `mapstructure:"username"`
+	Password  string `mapstructure:"password"`
+}
+
+func NewDefaultKafkaConfig() *KafkaConfig {
+	return &KafkaConfig{
+		Enable:                   false,
+		Brokers:                  []string{"localhost:9092"},
+		ConsumerGroup:            "default-group",
+		AutoCreateTopics:         true,
+		DefaultPartitions:        1,
+		DefaultReplicationFactor: 1,
+		Healthcheck:              30,
+		SASL: SASLConfig{
+			Enabled:   false,
+			Mechanism: "PLAIN",
+			Username:  "",
+			Password:  "",
+		},
+	}
+}

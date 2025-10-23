@@ -29,6 +29,7 @@ type ConfigBase struct {
 	Mongo    *MongoConfig    `mapstructure:"mongo"`
 	Redis    *RedisConfig    `mapstructure:"redis"`
 	Postgres *PostgresConfig `mapstructure:"postgres"`
+	Kafka    *KafkaConfig    `mapstructure:"kafka"`
 }
 
 func NewDefaultConfigBaseConfig() *ConfigBase {
@@ -38,6 +39,7 @@ func NewDefaultConfigBaseConfig() *ConfigBase {
 		Mongo:    NewDefaultMongoConfig(),
 		Redis:    NewDefaultRedisConfig(),
 		Postgres: NewDefaultPostgresConfig(),
+		Kafka:    NewDefaultKafkaConfig(),
 	}
 }
 

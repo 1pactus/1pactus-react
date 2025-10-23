@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type grpcClient struct {
+type GrpcClient struct {
 	ctx               context.Context
 	servers           []string
 	conn              *grpc.ClientConn
@@ -25,10 +25,10 @@ type grpcClient struct {
 	transactionClient pactus.TransactionClient
 }
 
-func newGrpcClient(timeout time.Duration, servers []string) *grpcClient {
+func NewGrpcClient(timeout time.Duration, servers []string) *GrpcClient {
 	ctx := context.Background()
 
-	cli := &grpcClient{
+	cli := &GrpcClient{
 		ctx:               ctx,
 		timeout:           timeout,
 		conn:              nil,
@@ -43,7 +43,7 @@ func newGrpcClient(timeout time.Duration, servers []string) *grpcClient {
 	return cli
 }
 
-func (c *grpcClient) connect() error {
+func (c *GrpcClient) Connect() error {
 	if c.conn != nil {
 		return nil
 	}
@@ -80,8 +80,8 @@ func (c *grpcClient) connect() error {
 	return errors.New("unable to connect to the servers")
 }
 
-func (c *grpcClient) getBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
+	if err := c.Connect(); err != nil {
 		return nil, err
 	}
 
@@ -94,8 +94,8 @@ func (c *grpcClient) getBlockchainInfo() (*pactus.GetBlockchainInfoResponse, err
 	return info, nil
 }
 
-func (c *grpcClient) getBlock(height uint32, verbosity pactus.BlockVerbosity) (*pactus.GetBlockResponse, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) GetBlock(height uint32, verbosity pactus.BlockVerbosity) (*pactus.GetBlockResponse, error) {
+	if err := c.Connect(); err != nil {
 		return nil, err
 	}
 
@@ -108,8 +108,8 @@ func (c *grpcClient) getBlock(height uint32, verbosity pactus.BlockVerbosity) (*
 	return info, nil
 }
 
-func (c *grpcClient) getAccount(addrStr string) (*pactus.AccountInfo, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) getAccount(addrStr string) (*pactus.AccountInfo, error) {
+	if err := c.Connect(); err != nil {
 		return nil, err
 	}
 
@@ -122,8 +122,8 @@ func (c *grpcClient) getAccount(addrStr string) (*pactus.AccountInfo, error) {
 	return res.Account, nil
 }
 
-func (c *grpcClient) getValidator(addrStr string) (*pactus.ValidatorInfo, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) getValidator(addrStr string) (*pactus.ValidatorInfo, error) {
+	if err := c.Connect(); err != nil {
 		return nil, err
 	}
 
@@ -136,8 +136,8 @@ func (c *grpcClient) getValidator(addrStr string) (*pactus.ValidatorInfo, error)
 	return res.Validator, nil
 }
 
-func (c *grpcClient) sendTx(trx *tx.Tx) (tx.ID, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) sendTx(trx *tx.Tx) (tx.ID, error) {
+	if err := c.Connect(); err != nil {
 		return hash.UndefHash, err
 	}
 
@@ -155,8 +155,8 @@ func (c *grpcClient) sendTx(trx *tx.Tx) (tx.ID, error) {
 }
 
 // TODO: check the return value type.
-func (c *grpcClient) getTransaction(id tx.ID) (*pactus.GetTransactionResponse, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) getTransaction(id tx.ID) (*pactus.GetTransactionResponse, error) {
+	if err := c.Connect(); err != nil {
 		return nil, err
 	}
 
@@ -172,8 +172,8 @@ func (c *grpcClient) getTransaction(id tx.ID) (*pactus.GetTransactionResponse, e
 	return res, nil
 }
 
-func (c *grpcClient) getFee(amt amount.Amount, payloadType payload.Type) (amount.Amount, error) {
-	if err := c.connect(); err != nil {
+func (c *GrpcClient) getFee(amt amount.Amount, payloadType payload.Type) (amount.Amount, error) {
+	if err := c.Connect(); err != nil {
 		return 0, err
 	}
 

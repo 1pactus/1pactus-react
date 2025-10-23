@@ -19,14 +19,14 @@ const (
 
 type ChainGather struct {
 	db   *db.DbClient
-	grpc *grpcClient
+	grpc *GrpcClient
 	log  log.ILogger
 }
 
 func NewChainGather(log log.ILogger, grpcServers []string) *ChainGather {
 	p := &ChainGather{
 		db:   db.NewDBClient(),
-		grpc: newGrpcClient(time.Second*10, grpcServers),
+		grpc: NewGrpcClient(time.Second*10, grpcServers),
 		log:  log,
 	}
 
@@ -40,7 +40,7 @@ func (p *ChainGather) Connect() error {
 		return fmt.Errorf("db is not initialized")
 	}
 
-	err := p.grpc.connect()
+	err := p.grpc.Connect()
 
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (p *ChainGather) startCommit(wg *sync.WaitGroup) (chan *db.DBCommit, chan e
 }
 
 func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
-	_, err := p.grpc.getBlockchainInfo()
+	_, err := p.grpc.GetBlockchainInfo()
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 		p.log.Infof("topBlockInfo.Height=%v", height)
 	}
 
-	blockchainInfo, err := p.grpc.getBlockchainInfo()
+	blockchainInfo, err := p.grpc.GetBlockchainInfo()
 
 	if err != nil {
 		return fmt.Errorf("getBlockchainInfo failed: %v", err)
@@ -176,7 +176,7 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 				return nil
 			}
 
-			block, err := p.grpc.getBlock(height, pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
+			block, err := p.grpc.GetBlock(height, pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
 
 			if err != nil {
 				p.log.Errorf("getBlock failed: %v", err.Error())

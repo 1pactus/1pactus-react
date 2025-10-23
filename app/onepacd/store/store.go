@@ -15,7 +15,16 @@ func Init(config *config.ConfigBase) error {
 		return err
 	}
 
+	if config.Kafka.Enable {
+		if err := setupKafka(config.Kafka); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func Close() {
 }
 
 func setupMongo(conf *config.MongoConfig) (err error) {
@@ -29,6 +38,16 @@ func setupMongo(conf *config.MongoConfig) (err error) {
 func setupPostgres(conf *config.PostgresConfig) error {
 	if err := storedriver.PostgresGormStart("base", conf, []storedriver.IPostgresGormStore{
 		Postgres,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupKafka(conf *config.KafkaConfig) error {
+	if err := storedriver.KafkaStart("base", conf, []storedriver.IKafkaStore{
+		Kafka,
 	}); err != nil {
 		return err
 	}

@@ -19,7 +19,7 @@ COPY web/ ./
 RUN pnpm run build
 
 # --- Production Stage ---
-FROM nginx:alpine
+FROM nginx:stable-alpine3.21-perl
 
 # Copy built files from builder stage
 COPY --from=builder /src/out /usr/share/nginx/html
