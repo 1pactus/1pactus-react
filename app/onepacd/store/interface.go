@@ -1,6 +1,8 @@
 package store
 
 import (
+	"context"
+
 	"github.com/1pactus/1pactus-react/app/onepacd/store/data"
 	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
 	"github.com/1pactus/1pactus-react/store/storedriver"
@@ -31,7 +33,7 @@ type IKafka interface {
 	storedriver.IKafkaStore
 
 	SendBlock(block *pactus.GetBlockResponse) error
-	ConsumeBlocks(groupID string, offset int64, handler func(*pactus.GetBlockResponse) (bool, error)) error
+	ConsumeBlocks(ctx context.Context, groupID string, offset int64, blocksChan chan<- *pactus.GetBlockResponse) error
 	GetLastBlockHeight() (int64, error)
 	GetBlockHeightOffset(height int64) (int64, error)
 }

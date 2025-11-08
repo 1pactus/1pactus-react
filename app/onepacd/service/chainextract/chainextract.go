@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
-	"github.com/1pactus/1pactus-react/app/onepacd/service/gather"
+	gather "github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	"github.com/1pactus/1pactus-react/lifecycle"
 	"github.com/1pactus/1pactus-react/log"
@@ -31,6 +31,10 @@ func NewChainExtractService(appLifeCycle *lifecycle.AppLifeCycle, config *Config
 	}
 }
 
+func (s *ChainExtractService) GetReader() chainreader.BlockchainReader {
+	return s.mainReader
+}
+
 func (s *ChainExtractService) Run() {
 	defer s.LifeCycleDead(true)
 	defer s.log.Info("BYE")
@@ -44,41 +48,63 @@ func (s *ChainExtractService) Run() {
 		return
 	}
 
-	/*reader, err := newBlockchainGrpcReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+	if s.kafkaEnable {
+		s.mainReader, err = chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+	} else {
+		s.mainReader, err = chainreader.NewBlockchainGrpcReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+	}
 
 	if err != nil {
-		s.log.Errorf("newBlockchainReader failed: %v", err.Error())
+		s.log.Errorf("NewBlockchainKafkaReader failed: %v", err.Error())
 		return
 	}
 
-	go func() {
-		defer reader.Close()
-		for block := range reader.Read(1, "") {
-			s.log.Infof("got block height %d from blockchain reader", block.Height)
-		}
-	}()*/
+	defer s.mainReader.Close()
 
-	reader, err := chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
-
-	go func() {
+	/*
 		defer reader.Close()
-		defer s.log.Info("kafka reader goroutine exited")
-		isStart := true
-		startTime := time.Now()
 
-		defer reader.Close()
-		for block := range reader.Read(1, "") {
-			if isStart {
-				isStart = false
-				s.log.Infof("started consuming blocks from kafka topic at block height %d", block.Height)
-			} else {
-				if block.Height%1000 == 0 {
-					timeElapsed := time.Since(startTime)
-					s.log.Infof("block height %d consumed, %v", block.Height, timeElapsed)
+		go func() {
+			defer s.log.Info("kafka reader goroutine exited")
+			group, _ := reader.CreateGroup(1, "reader0")
+			defer group.Close()
+
+			isStart := true
+			startTime := time.Now()
+
+			for block := range group.Read() {
+				if isStart {
+					isStart = false
+					s.log.Infof("started consuming blocks from kafka topic at block height %d", block.Height)
+				} else {
+					if block.Height%1000 == 0 {
+						timeElapsed := time.Since(startTime)
+						s.log.WithKv("groupid", "reader0").Infof("block height %d consumed, %v", block.Height, timeElapsed)
+					}
 				}
 			}
-		}
-	}()
+		}()
+
+		go func() {
+			defer s.log.Info("kafka reader goroutine exited")
+			group, _ := reader.CreateGroup(1000000, "reader1")
+			defer group.Close()
+
+			isStart := true
+			startTime := time.Now()
+
+			for block := range group.Read() {
+				if isStart {
+					isStart = false
+					s.log.Infof("started consuming blocks from kafka topic at block height %d", block.Height)
+				} else {
+					if block.Height%1000 == 0 {
+						timeElapsed := time.Since(startTime)
+						s.log.WithKv("groupid", "reader1").Infof("block height %d consumed, %v", block.Height, timeElapsed)
+					}
+				}
+			}
+		}()*/
 
 	/*
 		if s.kafkaEnable {
@@ -188,12 +214,9 @@ func (s *ChainExtractService) fetchBlockchainToKafka() error {
 	}
 }
 
+/*
 func (s *ChainExtractService) fetchBlockFromKafka() error {
-	/*height, err := store.Kafka.GetLastBlockHeight()
 
-	if err != nil {
-		return fmt.Errorf("GetLastBlockHeight failed: %w", err)
-	}*/
 
 	height := int64(100_0000)
 
@@ -230,3 +253,4 @@ func (s *ChainExtractService) fetchBlockFromKafka() error {
 
 	return nil
 }
+*/

@@ -27,22 +27,21 @@ var (
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
-	//dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather)
-	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 	chainExtractService = chainextract.NewChainExtractService(appLifeCycle, conf.Service.ChainExtract, conf.Kafka.Enable)
+	dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather, chainExtractService)
+	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 
-	//appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
-	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
 	appLifeCycle.WatchServiceLifeCycle(chainExtractService.ServiceLifeCycle)
+	appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
+	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
 
 	return nil
 }
 
 func RunServices() {
-	//go dummyService.Run()
-	//go dataCollect.Run()
-	go webApi.Run()
 	go chainExtractService.Run()
+	go dataCollect.Run()
+	go webApi.Run()
 }
 
 func Run() {

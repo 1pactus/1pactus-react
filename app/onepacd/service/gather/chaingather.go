@@ -1,5 +1,7 @@
 package gather
 
+/*
+
 import (
 	"context"
 	"fmt"
@@ -13,9 +15,6 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
-const (
-	Treasury = "000000000000000000000000000000000000000000"
-)
 
 type ChainGather struct {
 	db   *db.DbClient
@@ -287,3 +286,4 @@ func (p *ChainGather) FetchBlockchain(ctx context.Context) error {
 		}
 	}
 }
+*/

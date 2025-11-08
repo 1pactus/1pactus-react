@@ -4,24 +4,32 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
 	"github.com/1pactus/1pactus-react/lifecycle"
 	"github.com/1pactus/1pactus-react/log"
 	"github.com/robfig/cron/v3"
 )
 
-type DataGatherService struct {
-	*lifecycle.ServiceLifeCycle
-	log    log.ILogger
-	config *Config
-	cron   *cron.Cron
+type ReaderProvider interface {
+	GetReader() chainreader.BlockchainReader
 }
 
-func NewGatherService(appLifeCycle *lifecycle.AppLifeCycle, config *Config) *DataGatherService {
+type DataGatherService struct {
+	*lifecycle.ServiceLifeCycle
+	log            log.ILogger
+	config         *Config
+	cron           *cron.Cron
+	reader         chainreader.BlockchainReader
+	readerProvider ReaderProvider
+}
+
+func NewGatherService(appLifeCycle *lifecycle.AppLifeCycle, config *Config, readerProvider ReaderProvider) *DataGatherService {
 	return &DataGatherService{
 		ServiceLifeCycle: lifecycle.NewServiceLifeCycle(appLifeCycle),
 		log:              log.WithKv("service", "gather"),
 		config:           config,
 		cron:             cron.New(cron.WithLocation(time.UTC)),
+		readerProvider:   readerProvider,
 	}
 }
 
@@ -33,7 +41,16 @@ func (s *DataGatherService) Run() {
 
 	defer close(gatherChan)
 
-	s.log.Info("HI")
+	for {
+		s.reader = s.readerProvider.GetReader()
+		if s.reader == nil {
+			s.log.Warnf("blockchain reader is not initialized yet, retrying in 5 seconds...")
+			time.Sleep(5 * time.Second)
+			continue
+		} else {
+			break
+		}
+	}
 
 	_, err := s.cron.AddFunc("10 0 * * *", func() {
 		s.log.Info("starting scheduled task at UTC 00:10")
@@ -76,22 +93,7 @@ func (s *DataGatherService) startGatherBlockchain(dieChan <-chan struct{}) (err 
 	s.log.Infof("blockchain gather started")
 	defer s.log.Infof("blockchain gather stopped")
 
-	/*
-		cg := NewChainGather(s.log, s.config.GrpcServers)
-
-		if err := cg.Connect(); err != nil {
-			return fmt.Errorf("failed to connect to grpc servers: %w", err)
-		}
-
-		if err := cg.FetchBlockchain(context.Background()); err != nil {
-			return fmt.Errorf("failed to fetch blockchain: %w", err)
-		}*/
-
-	cg := NewPgChainGather(s.log, s.config.GrpcServers)
-
-	if err := cg.Connect(); err != nil {
-		return fmt.Errorf("failed to connect to grpc servers: %w", err)
-	}
+	cg := NewPgChainGather(s.log, s.reader)
 
 	if err := cg.FetchBlockchain(dieChan); err != nil {
 		return fmt.Errorf("failed to fetch blockchain: %w", err)

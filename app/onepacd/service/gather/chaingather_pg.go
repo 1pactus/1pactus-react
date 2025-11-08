@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
 	"github.com/1pactus/1pactus-react/app/onepacd/service/gather/constants"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	db "github.com/1pactus/1pactus-react/app/onepacd/store"
@@ -13,35 +14,23 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
+const (
+	Treasury = "000000000000000000000000000000000000000000"
+)
+
 type PgChainGather struct {
-	grpc        *GrpcClient
 	log         log.ILogger
 	grpcServers []string
+	reader      chainreader.BlockchainReader
 }
 
-func NewPgChainGather(log log.ILogger, grpcServers []string) *PgChainGather {
+func NewPgChainGather(log log.ILogger, reader chainreader.BlockchainReader) *PgChainGather {
 	p := &PgChainGather{
-		grpc:        NewGrpcClient(time.Second*10, grpcServers),
-		log:         log,
-		grpcServers: grpcServers,
+		log:    log,
+		reader: reader,
 	}
 
 	return p
-}
-
-func (p *PgChainGather) Connect() error {
-	for _, server := range p.grpcServers {
-		p.log.Infof("trying to connect to gRPC server: %s", server)
-	}
-
-	err := p.grpc.Connect()
-
-	if err != nil {
-
-		return err
-	}
-
-	return nil
 }
 
 func (p *PgChainGather) getDailyStartHeight(height uint32) uint32 {
@@ -99,10 +88,7 @@ func (p *PgChainGather) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, ch
 }
 
 func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
-	_, err := p.grpc.GetBlockchainInfo()
-	if err != nil {
-		return err
-	}
+	defer p.log.Infof("FetchBlockchain exited")
 
 	var commitWg sync.WaitGroup
 
@@ -134,7 +120,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 		p.log.Infof("top block height: %v", height)
 	}
 
-	blockchainInfo, err := p.grpc.GetBlockchainInfo()
+	blockchainInfo, err := p.reader.GetBlockchainInfo()
 
 	if err != nil {
 		return fmt.Errorf("getBlockchainInfo failed: %v", err)
@@ -151,6 +137,10 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 
 	IsInitial := false
 
+	group, _ := p.reader.CreateGroup(height+1, "pg_gatherer")
+
+	defer group.Close()
+
 	for {
 		select {
 		case <-dieChan:
@@ -159,24 +149,19 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 		case err = <-commitErrChain:
 			p.log.Errorf("commit error: %v", err)
 			return err
-		default:
-			height++
-
-			if height >= lastBlockHeight {
+		case block, ok := <-group.Read():
+			if !ok {
 				p.log.Infof("top height reached: %v", height)
-
 				commitChan <- nil // close commitChan
 				commitWg.Wait()
-
 				return nil
 			}
+			height = int64(block.Height)
 
-			block, err := p.grpc.GetBlock(uint32(height), pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
+			if height >= lastBlockHeight {
+				group.Close()
 
-			if err != nil {
-				p.log.Errorf("getBlock failed: %v", err.Error())
-
-				return err
+				return nil
 			}
 
 			timeIndex := p.GetTimeIndex(block.BlockTime)

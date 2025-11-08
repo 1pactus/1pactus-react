@@ -68,7 +68,7 @@ func (s *kafkaStore) SendBlock(block *pactus.GetBlockResponse) error {
 	return s.writer.WriteMessages(ctx, message)
 }
 
-func (s *kafkaStore) ConsumeBlocks(groupID string, offset int64, handler func(*pactus.GetBlockResponse) (bool, error)) error {
+func (s *kafkaStore) ConsumeBlocks(ctx context.Context, groupID string, offset int64, blocksChan chan<- *pactus.GetBlockResponse) error {
 	reader := s.Kafka.GetReader(kafkaTopicBlocks, storedriver.NewReaderOptions().
 		WithGroupID(groupID).
 		WithSeekOffset(offset))
@@ -76,12 +76,12 @@ func (s *kafkaStore) ConsumeBlocks(groupID string, offset int64, handler func(*p
 	defer reader.Close()
 
 	for {
-		ctx, cancel := context.WithTimeout(context.Background(), s.Kafka.GetTimeout())
-
 		message, err := reader.ReadMessage(ctx)
-		cancel()
 
 		if err != nil {
+			if ctx.Err() == context.Canceled {
+				return context.Canceled
+			}
 			return fmt.Errorf("failed to read message: %v", err)
 		}
 
@@ -90,13 +90,11 @@ func (s *kafkaStore) ConsumeBlocks(groupID string, offset int64, handler func(*p
 			return err
 		}
 
-		if ok, err := handler(&block); err != nil {
-			return err
-		} else {
-			if !ok {
-				// manual stop
-				break
-			}
+		select {
+		case blocksChan <- &block:
+			continue
+		case <-ctx.Done():
+			return nil
 		}
 	}
 

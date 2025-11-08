@@ -1,11 +1,14 @@
 package chainreader
 
-import pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+import (
+	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+)
 
 type BlockchainReader interface {
-	Read(beginHeight int64, consumerGroupID string) <-chan *pactus.GetBlockResponse
+	CreateGroup(beginHeight int64, consumerGroupID string) (BlockchainReaderGroup, bool)
 	Close()
-	IsSlowMode() bool
+
+	GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error)
 }
 
 type BlockchainReaderGroup interface {
