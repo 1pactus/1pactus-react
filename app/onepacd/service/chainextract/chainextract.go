@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
 	"github.com/1pactus/1pactus-react/app/onepacd/service/gather"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	"github.com/1pactus/1pactus-react/lifecycle"
 	"github.com/1pactus/1pactus-react/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
-	"github.com/segmentio/kafka-go"
-	"google.golang.org/protobuf/proto"
 )
 
 type ChainExtractService struct {
@@ -19,6 +18,7 @@ type ChainExtractService struct {
 	config      *Config
 	grpc        *gather.GrpcClient
 	kafkaEnable bool
+	mainReader  chainreader.BlockchainReader
 }
 
 func NewChainExtractService(appLifeCycle *lifecycle.AppLifeCycle, config *Config, kafkaEnable bool) *ChainExtractService {
@@ -26,7 +26,7 @@ func NewChainExtractService(appLifeCycle *lifecycle.AppLifeCycle, config *Config
 		ServiceLifeCycle: lifecycle.NewServiceLifeCycle(appLifeCycle),
 		log:              log.WithKv("service", "chainextract"),
 		config:           config,
-		grpc:             gather.NewGrpcClient(time.Second*10, config.GrpcServers),
+		grpc:             gather.NewGrpcClient(time.Second*5, config.GrpcServers),
 		kafkaEnable:      kafkaEnable,
 	}
 }
@@ -35,7 +35,58 @@ func (s *ChainExtractService) Run() {
 	defer s.LifeCycleDead(true)
 	defer s.log.Info("BYE")
 
-	s.log.Info("HI")
+	s.log.Infof("start to connect grpc servers: %v", s.grpc.GetServers())
+
+	err := s.grpc.Connect()
+
+	if err != nil {
+		s.log.Errorf("failed to connect grpc servers: %v", err.Error())
+		return
+	}
+
+	/*reader, err := newBlockchainGrpcReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+
+	if err != nil {
+		s.log.Errorf("newBlockchainReader failed: %v", err.Error())
+		return
+	}
+
+	go func() {
+		defer reader.Close()
+		for block := range reader.Read(1, "") {
+			s.log.Infof("got block height %d from blockchain reader", block.Height)
+		}
+	}()*/
+
+	reader, err := chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+
+	go func() {
+		defer reader.Close()
+		defer s.log.Info("kafka reader goroutine exited")
+		isStart := true
+		startTime := time.Now()
+
+		defer reader.Close()
+		for block := range reader.Read(1, "") {
+			if isStart {
+				isStart = false
+				s.log.Infof("started consuming blocks from kafka topic at block height %d", block.Height)
+			} else {
+				if block.Height%1000 == 0 {
+					timeElapsed := time.Since(startTime)
+					s.log.Infof("block height %d consumed, %v", block.Height, timeElapsed)
+				}
+			}
+		}
+	}()
+
+	/*
+		if s.kafkaEnable {
+			if err := s.fetchBlockchainToKafka(); err != nil {
+				s.log.Errorf("fetchBlockchainToKafka failed: %v", err.Error())
+				return
+			}
+		}*/
 
 	/*
 		if err := s.fetchBlockchain(); err != nil {
@@ -43,22 +94,30 @@ func (s *ChainExtractService) Run() {
 			return
 		}*/
 
-	if err := s.fetchBlockFromKafka(); err != nil {
+	/*if err := s.fetchBlockFromKafka(); err != nil {
 		s.log.Errorf("fetchBlockFromKafka failed: %v", err.Error())
 		return
-	}
+	}*/
 
 	<-s.Done()
 }
 
-func (s *ChainExtractService) fetchBlockchain() error {
-	err := s.grpc.Connect()
+func (s *ChainExtractService) fetchBlockchainToKafka() error {
+	defer s.log.Infof("fetchBlockchainToKafka stopped")
 
+	height, err := store.Kafka.GetLastBlockHeight()
 	if err != nil {
-		return fmt.Errorf("failed to connect grpc servers: %w", err)
+		if err == store.ErrorKafkaTopicEmpty {
+			s.log.Infof("kafka topic is empty, starting from block height %d", height)
+		} else {
+			return fmt.Errorf("GetLastBlockHeight failed: %w", err)
+		}
+	} else {
+		s.log.Infof("last block height in kafka is %d", height)
 	}
 
-	var height int64
+	height++
+
 	var lastBlockHeight int64
 
 	blockchainInfo, err := s.grpc.GetBlockchainInfo()
@@ -68,25 +127,32 @@ func (s *ChainExtractService) fetchBlockchain() error {
 	}
 
 	lastBlockHeight = int64(blockchainInfo.LastBlockHeight)
-	//lastBlockHeight = 10_0000
 
 	startTime := time.Now()
 
-	s.log.Warnf("start")
+	firstGet := true
+	slowMode := true
 
 	for {
 		select {
 		case <-s.Done():
 			return nil
 		default:
-			height++
+			if height > lastBlockHeight {
+				blockchainInfo, err := s.grpc.GetBlockchainInfo()
 
-			if height >= lastBlockHeight {
-				// top reached, wait for new blocks
-				height--
-				//time.Sleep(time.Second * 10)
-				s.log.Info("done")
-				return nil
+				if err != nil {
+					return fmt.Errorf("getBlockchainInfo failed: %w", err)
+				}
+
+				if int64(blockchainInfo.LastBlockHeight) > lastBlockHeight {
+					lastBlockHeight = int64(blockchainInfo.LastBlockHeight)
+					slowMode = true
+				} else {
+					// wait new block
+					time.Sleep(time.Second * 5)
+					continue
+				}
 			}
 
 			block, err := s.grpc.GetBlock(uint32(height), pactus.BlockVerbosity_BLOCK_VERBOSITY_TRANSACTIONS)
@@ -96,6 +162,11 @@ func (s *ChainExtractService) fetchBlockchain() error {
 				return err
 			}
 
+			if firstGet {
+				firstGet = false
+				s.log.Infof("starting get block from grpc at height %d", height)
+			}
+
 			err = store.Kafka.SendBlock(block)
 
 			if err != nil {
@@ -103,39 +174,54 @@ func (s *ChainExtractService) fetchBlockchain() error {
 				return err
 			}
 
-			if height%1000 == 0 {
-				timeElapsed := time.Since(startTime)
-				s.log.Infof("block height %d processed, %v", height, timeElapsed)
+			if slowMode {
+				s.log.Infof("last block %d send to kafka", block.Height)
+			} else {
+				if height%8640 == 0 {
+					timeElapsed := time.Since(startTime)
+					s.log.Infof("block %d/%d (%.2f%%) send to kafka, (%v)", height, lastBlockHeight, float64(height)/float64(lastBlockHeight)*100, timeElapsed)
+				}
 			}
+
+			height++
 		}
 	}
 }
 
 func (s *ChainExtractService) fetchBlockFromKafka() error {
-	height, err := store.Kafka.GetLastBlockHeight()
+	/*height, err := store.Kafka.GetLastBlockHeight()
 
 	if err != nil {
 		return fmt.Errorf("GetLastBlockHeight failed: %w", err)
+	}*/
+
+	height := int64(100_0000)
+
+	topicOffset, err := store.Kafka.GetBlockHeightOffset(height)
+
+	if err != nil {
+		return fmt.Errorf("GetBlockHeightOffset failed: %w", err)
 	}
 
-	s.log.Infof("starting from block height %d", height+1)
+	s.log.Infof("starting from block height %d", height)
 
 	startTime := time.Now()
 
+	isStart := true
+
 	// Implement fetching block from Kafka
-	err = store.Kafka.ConsumeMessages(store.KafkaTopicBlocks, func(message kafka.Message) error {
-		var block pactus.GetBlockResponse
-		if err := proto.Unmarshal(message.Value, &block); err != nil {
-			s.log.Errorf("failed to unmarshal block: %v", err)
-			return err
+	err = store.Kafka.ConsumeBlocks("blocks_read", topicOffset, func(block *pactus.GetBlockResponse) (bool, error) {
+		if isStart {
+			isStart = false
+			s.log.Infof("started consuming blocks from kafka topic at block height %d", block.Height)
+		} else {
+			if block.Height%1000 == 0 {
+				timeElapsed := time.Since(startTime)
+				s.log.Infof("block height %d consumed, %v", block.Height, timeElapsed)
+			}
 		}
 
-		if block.Height%1000 == 0 {
-			timeElapsed := time.Since(startTime)
-			s.log.Infof("block height %d consumed, %v", block.Height, timeElapsed)
-		}
-
-		return nil
+		return true, nil
 	})
 
 	if err != nil {

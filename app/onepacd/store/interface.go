@@ -5,7 +5,6 @@ import (
 	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
 	"github.com/1pactus/1pactus-react/store/storedriver"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
-	"github.com/segmentio/kafka-go"
 )
 
 type IMongo interface {
@@ -32,8 +31,9 @@ type IKafka interface {
 	storedriver.IKafkaStore
 
 	SendBlock(block *pactus.GetBlockResponse) error
-	ConsumeMessages(topic string, handler func(kafka.Message) error) error
+	ConsumeBlocks(groupID string, offset int64, handler func(*pactus.GetBlockResponse) (bool, error)) error
 	GetLastBlockHeight() (int64, error)
+	GetBlockHeightOffset(height int64) (int64, error)
 }
 
 var (

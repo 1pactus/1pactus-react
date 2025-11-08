@@ -43,6 +43,16 @@ func NewGrpcClient(timeout time.Duration, servers []string) *GrpcClient {
 	return cli
 }
 
+func (c *GrpcClient) GetServers() []string {
+	ret := make([]string, len(c.servers))
+
+	for _, s := range c.servers {
+		ret = append(ret, s)
+	}
+
+	return ret
+}
+
 func (c *GrpcClient) Connect() error {
 	if c.conn != nil {
 		return nil

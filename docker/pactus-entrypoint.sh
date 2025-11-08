@@ -13,5 +13,8 @@ if [ ! -f "$PACTUS_HOME/config.toml" ]; then
     echo "init completed"
 fi
 
+sed -i 's/localhost/0.0.0.0/g' $PACTUS_HOME/config.toml
+sed -i 's/127\.0\.0\.1/0.0.0.0/g' $PACTUS_HOME/config.toml
+
 echo "start node ..."
 exec pactus-daemon start --password "${PACTUS_WALLET_PASSWORD}"

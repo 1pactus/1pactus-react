@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	KafkaTopicBlocks = "onepacd-blocks"
+	kafkaTopicBlocks = "onepacd-blocks"
 )
 
 type kafkaStore struct {
@@ -27,12 +27,12 @@ type kafkaStore struct {
 func (s *kafkaStore) Init(store storedriver.Kafka, conf *config.KafkaConfig) {
 	s.Kafka = store
 	s.conf = conf
-	s.blocksReader = store.GetReader(KafkaTopicBlocks)
+	s.blocksReader = store.GetReader(kafkaTopicBlocks)
 	s.writer = store.GetWriter()
 }
 
 func (s *kafkaStore) Topics() []string {
-	return []string{KafkaTopicBlocks}
+	return []string{kafkaTopicBlocks}
 }
 
 func (s *kafkaStore) SendMessage(topic, key string, value []byte) error {
@@ -59,7 +59,7 @@ func (s *kafkaStore) SendBlock(block *pactus.GetBlockResponse) error {
 	defer cancel()
 
 	message := kafka.Message{
-		Topic: KafkaTopicBlocks,
+		Topic: kafkaTopicBlocks,
 		Key:   nil,
 		Value: data,
 		Time:  time.Now(),
@@ -68,8 +68,12 @@ func (s *kafkaStore) SendBlock(block *pactus.GetBlockResponse) error {
 	return s.writer.WriteMessages(ctx, message)
 }
 
-func (s *kafkaStore) ConsumeMessages(topic string, handler func(kafka.Message) error) error {
-	reader := s.Kafka.GetReader(topic)
+func (s *kafkaStore) ConsumeBlocks(groupID string, offset int64, handler func(*pactus.GetBlockResponse) (bool, error)) error {
+	reader := s.Kafka.GetReader(kafkaTopicBlocks, storedriver.NewReaderOptions().
+		WithGroupID(groupID).
+		WithSeekOffset(offset))
+
+	defer reader.Close()
 
 	for {
 		ctx, cancel := context.WithTimeout(context.Background(), s.Kafka.GetTimeout())
@@ -81,18 +85,35 @@ func (s *kafkaStore) ConsumeMessages(topic string, handler func(kafka.Message) e
 			return fmt.Errorf("failed to read message: %v", err)
 		}
 
-		if err := handler(message); err != nil {
-			log.Printf("Error handling message: %v", err)
-			continue
+		var block pactus.GetBlockResponse
+		if err := proto.Unmarshal(message.Value, &block); err != nil {
+			return err
+		}
+
+		if ok, err := handler(&block); err != nil {
+			return err
+		} else {
+			if !ok {
+				// manual stop
+				break
+			}
 		}
 	}
+
+	return nil
 }
 
+var ErrorKafkaTopicEmpty = fmt.Errorf("kafka topic is empty")
+
 func (s *kafkaStore) GetLastBlockHeight() (int64, error) {
-	partitionsLastMessage, err := s.Kafka.GetAllPartitionsLastMessage(KafkaTopicBlocks)
+	partitionsLastMessage, err := s.Kafka.GetAllPartitionsLastMessage(kafkaTopicBlocks)
 
 	if err != nil {
 		return 0, fmt.Errorf("GetAllPartitionsLastMessage failed: %w", err)
+	}
+
+	if len(partitionsLastMessage) == 0 {
+		return 0, ErrorKafkaTopicEmpty
 	}
 
 	height := int64(-1)
@@ -108,9 +129,31 @@ func (s *kafkaStore) GetLastBlockHeight() (int64, error) {
 		}
 	}
 
-	if height == -1 {
-		return 0, fmt.Errorf("no blocks found in topic %s", KafkaTopicBlocks)
+	return height, nil
+}
+
+func (s *kafkaStore) GetBlockHeightOffset(height int64) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.Kafka.GetTimeout())
+	defer cancel()
+
+	offset, err := s.Kafka.FindOffset(ctx, kafkaTopicBlocks, func(message kafka.Message) (int, error) {
+		var block pactus.GetBlockResponse
+		if err := proto.Unmarshal(message.Value, &block); err != nil {
+			return 0, fmt.Errorf("failed to unmarshal block: %w", err)
+		}
+
+		if int64(block.Height) < height {
+			return -1, nil
+		} else if int64(block.Height) > height {
+			return 1, nil
+		}
+
+		return 0, nil
+	})
+
+	if err != nil {
+		return 0, fmt.Errorf("FindOffset failed: %w", err)
 	}
 
-	return height, nil
+	return offset, nil
 }

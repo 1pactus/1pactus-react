@@ -239,15 +239,15 @@ func (db *postgresGormImpl) monitorConnection() {
 			}
 
 			if err := sqlDB.PingContext(ctx); err != nil {
-				db.log.Errorf("lost mysql connection, retrying: %v", err)
+				db.log.Errorf("lost pgsql connection, retrying: %v", err)
 
 				for {
 					if err := db.connect(); err == nil {
 						db.initStores()
-						db.log.Info("successfully reconnected to mysql")
+						db.log.Info("successfully reconnected to pgsql")
 						break
 					}
-					db.log.Errorf("error connecting to mysql: %v", err)
+					db.log.Errorf("error connecting to pgsql: %v", err)
 					time.Sleep(5 * time.Second)
 				}
 			}

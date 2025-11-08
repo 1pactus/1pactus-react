@@ -13,24 +13,96 @@ import (
 	"github.com/segmentio/kafka-go/sasl/scram"
 )
 
+// ReaderOptions holds configuration options for creating a Kafka reader
+type ReaderOptions struct {
+	groupID     string
+	startOffset int64
+	seekOffset  *int64 // For specific numeric offsets that require Seek()
+	minBytes    int
+	maxBytes    int
+	partition   *int
+}
+
+// NewReaderOptions creates a new ReaderOptions with default values
+func NewReaderOptions() *ReaderOptions {
+	return &ReaderOptions{
+		startOffset: kafka.LastOffset,
+		minBytes:    10e3, // 10KB
+		maxBytes:    10e6, // 10MB
+	}
+}
+
+// WithGroupID sets the consumer group ID
+func (r *ReaderOptions) WithGroupID(groupID string) *ReaderOptions {
+	r.groupID = groupID
+	return r
+}
+
+// WithSeekOffset sets a specific numeric offset that will be applied using Seek()
+func (r *ReaderOptions) WithSeekOffset(offset int64) *ReaderOptions {
+	r.seekOffset = &offset
+	r.startOffset = kafka.FirstOffset // Start from beginning to allow seeking
+	return r
+}
+
+// WithFirstOffset sets the start offset to the beginning of the topic
+func (r *ReaderOptions) WithFirstOffset() *ReaderOptions {
+	r.startOffset = kafka.FirstOffset
+	return r
+}
+
+// WithLastOffset sets the start offset to the end of the topic (latest messages)
+func (r *ReaderOptions) WithLastOffset() *ReaderOptions {
+	r.startOffset = kafka.LastOffset
+	return r
+}
+
+// WithMinBytes sets the minimum number of bytes to fetch in each request
+func (r *ReaderOptions) WithMinBytes(minBytes int) *ReaderOptions {
+	r.minBytes = minBytes
+	return r
+}
+
+// WithMaxBytes sets the maximum number of bytes to fetch in each request
+func (r *ReaderOptions) WithMaxBytes(maxBytes int) *ReaderOptions {
+	r.maxBytes = maxBytes
+	return r
+}
+
+// WithPartition sets a specific partition to read from
+func (r *ReaderOptions) WithPartition(partition int) *ReaderOptions {
+	r.partition = &partition
+	return r
+}
+
+// ReaderConfig holds configuration options for creating a Kafka reader (legacy)
+type ReaderConfig struct {
+	Topic       string
+	GroupID     string
+	StartOffset int64
+	MinBytes    int
+	MaxBytes    int
+	Partition   *int // Optional: specific partition to read from
+}
+
 type IKafkaStore interface {
 	Init(store Kafka, conf *config.KafkaConfig)
 	Topics() []string
 }
 
 type Kafka interface {
-	GetReader(topic string) *kafka.Reader
+	GetReader(topic string, options ...*ReaderOptions) *kafka.Reader
 	GetWriter() *kafka.Writer
 	GetConn() *kafka.Conn
 	GetTimeout() time.Duration
 	GetAllPartitionsLastMessage(topic string) (map[int]*kafka.Message, error)
 	FindOffset(ctx context.Context, topic string, handler func(kafka.Message) (int, error)) (int64, error)
+	GetLogger() log.ILogger
 }
 
 type kafkaImpl struct {
 	conf    *config.KafkaConfig
 	conn    *kafka.Conn
-	readers map[string]*kafka.Reader
 	writer  *kafka.Writer
 	stores  []IKafkaStore
 	timeout time.Duration
@@ -42,12 +114,6 @@ func (k *kafkaImpl) Close() {
 		k.conn.Close()
 	}
 
-	for _, reader := range k.readers {
-		if reader != nil {
-			reader.Close()
-		}
-	}
-
 	if k.writer != nil {
 		k.writer.Close()
 	}
@@ -57,7 +123,6 @@ func KafkaStart(name string, conf *config.KafkaConfig, stores []IKafkaStore) err
 	k := &kafkaImpl{
 		conf:    conf,
 		stores:  stores,
-		readers: make(map[string]*kafka.Reader),
 		timeout: time.Second * 10, // Default timeout
 		log:     log.WithKv("module", "store").WithKv("kafka", name),
 	}
@@ -253,9 +318,27 @@ func (k *kafkaImpl) monitorConnection() {
 	}
 }
 
-func (k *kafkaImpl) GetReader(topic string) *kafka.Reader {
-	if reader, exists := k.readers[topic]; exists {
-		return reader
+func (k *kafkaImpl) GetLogger() log.ILogger {
+	return k.log
+}
+
+func (k *kafkaImpl) GetReader(topic string, options ...*ReaderOptions) *kafka.Reader {
+	// Use default options if none provided
+	var opts *ReaderOptions
+	if len(options) > 0 && options[0] != nil {
+		opts = options[0]
+	} else {
+		opts = NewReaderOptions()
+	}
+
+	// Set default groupID if not specified
+	groupID := opts.groupID
+	if groupID == "" {
+		groupID = k.conf.ConsumerGroup
+	}
+
+	if opts.seekOffset != nil {
+		groupID = ""
 	}
 
 	// Create new reader
@@ -289,17 +372,35 @@ func (k *kafkaImpl) GetReader(topic string) *kafka.Reader {
 		}
 	}
 
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        k.conf.Brokers,
-		Topic:          topic,
-		GroupID:        k.conf.ConsumerGroup,
-		MinBytes:       10e3, // 10KB
-		MaxBytes:       10e6, // 10MB
-		CommitInterval: time.Second,
-		Dialer:         dialer,
-	})
+	readerConfig := kafka.ReaderConfig{
+		Brokers:          k.conf.Brokers,
+		Topic:            topic,
+		GroupID:          groupID,
+		MinBytes:         opts.minBytes,
+		MaxBytes:         opts.maxBytes,
+		CommitInterval:   time.Second,
+		Dialer:           dialer,
+		StartOffset:      opts.startOffset,
+		ReadBatchTimeout: time.Second * 5,
+	}
 
-	k.readers[topic] = reader
+	// Set specific partition if provided
+	if opts.partition != nil {
+		readerConfig.Partition = *opts.partition
+		readerConfig.GroupID = "" // When reading from specific partition, GroupID should be empty
+	}
+
+	reader := kafka.NewReader(readerConfig)
+
+	// If seekOffset is specified, seek to that position
+	if opts.seekOffset != nil {
+		if err := reader.SetOffset(*opts.seekOffset); err != nil {
+			k.log.Errorf("failed to seek to offset %d: %v", *opts.seekOffset, err)
+			reader.Close()
+			return nil
+		}
+	}
+
 	return reader
 }
 

@@ -24,6 +24,10 @@ func (slc *ServiceLifeCycle) Done() <-chan struct{} {
 	return slc.ctx.Done()
 }
 
+func (slc *ServiceLifeCycle) Context() context.Context {
+	return slc.ctx
+}
+
 func (slc *ServiceLifeCycle) LifeCycleDead(stopApp bool) {
 	if slc.dead {
 		return
