@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	"github.com/1pactus/1pactus-react/log"
@@ -190,7 +191,24 @@ func (r *blockchainKafkaReaderConsumer) runConsumer() error {
 	topicOffset, err := store.Kafka.GetBlockHeightOffset(r.beginHeight)
 
 	if err != nil {
-		return fmt.Errorf("GetBlockHeightOffset failed: %w", err)
+		for {
+			r.log.Warnf("GetBlockHeightOffset beginHeight=%v failed, kafka data maybe unavailable, read from grpc now, retrying in 1 minute: %v", r.beginHeight, err)
+
+			for i := 0; i < 60; i++ {
+				select {
+				case <-r.ctx.Done():
+				default:
+					time.Sleep(1 * time.Second)
+				}
+			}
+
+			topicOffset, err = store.Kafka.GetBlockHeightOffset(r.beginHeight)
+
+			if err == nil {
+				r.log.Infof("GetBlockHeightOffset beginHeight=%v succeeded", r.beginHeight)
+				break
+			}
+		}
 	}
 
 	defer close(r.blockChan)
