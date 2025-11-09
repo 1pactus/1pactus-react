@@ -8,7 +8,10 @@
     "failed-load": "加载数据失败。",
     "try-later": "请稍后再试",
     "retry": "重试",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "time-range": "时间范围",
+    "all-time": "全部时间",
+    "days": "天"
   },
   "home": {
     "title": "1PACTUS 图表",

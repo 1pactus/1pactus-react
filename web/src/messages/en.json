@@ -8,7 +8,10 @@
     "failed-load": "Failed to load data.",
     "try-later": "Please try again later",
     "retry": "Retry",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "time-range": "Time Range",
+    "all-time": "All Time",
+    "days": "Days"
   },
   "home": {
     "title": "1PACTUS Charts",

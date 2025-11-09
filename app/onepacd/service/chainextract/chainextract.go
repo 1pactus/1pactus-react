@@ -48,6 +48,8 @@ func (s *ChainExtractService) Run() {
 		return
 	}
 
+	s.log.Infof("kafka enable: %v", s.kafkaEnable)
+
 	if s.kafkaEnable {
 		s.mainReader, err = chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
 	} else {
