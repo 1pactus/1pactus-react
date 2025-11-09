@@ -29,8 +29,8 @@ func NewWebApiService(appLifeCycle *lifecycle.AppLifeCycle, mode string, config 
 
 func (s *WebApiService) Run() {
 	defer s.LifeCycleDead(true)
-	defer s.log.Info("BYE")
-	s.log.Info("HI")
+	defer s.log.Info("Web API Service stopped")
+	s.log.Infof("Web API Service is starting...")
 
 	r := gin.New()
 

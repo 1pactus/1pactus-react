@@ -1,6 +1,7 @@
 package chainextract
 
 import (
+	"sync/atomic"
 	"time"
 
 	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
@@ -15,7 +16,7 @@ type ChainExtractService struct {
 	config      *Config
 	grpc        *gather.GrpcClient
 	kafkaEnable bool
-	mainReader  chainreader.BlockchainReader
+	mainReader  atomic.Value // stores chainreader.BlockchainReader
 }
 
 func NewChainExtractService(appLifeCycle *lifecycle.AppLifeCycle, config *Config, kafkaEnable bool) *ChainExtractService {
@@ -29,12 +30,17 @@ func NewChainExtractService(appLifeCycle *lifecycle.AppLifeCycle, config *Config
 }
 
 func (s *ChainExtractService) GetReader() chainreader.BlockchainReader {
-	return s.mainReader
+	reader := s.mainReader.Load()
+	if reader == nil {
+		return nil
+	}
+	return reader.(chainreader.BlockchainReader)
 }
 
 func (s *ChainExtractService) Run() {
 	defer s.LifeCycleDead(true)
-	defer s.log.Info("BYE")
+	defer s.log.Info("Chain Extract Service stopped")
+	s.log.Infof("Chain Extract Service is starting...")
 
 	s.log.Infof("start to connect grpc servers: %v", s.grpc.GetServers())
 
@@ -47,10 +53,11 @@ func (s *ChainExtractService) Run() {
 
 	s.log.Infof("kafka enable: %v", s.kafkaEnable)
 
+	var reader chainreader.BlockchainReader
 	if s.kafkaEnable {
-		s.mainReader, err = chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+		reader, err = chainreader.NewBlockchainKafkaReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
 	} else {
-		s.mainReader, err = chainreader.NewBlockchainGrpcReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
+		reader, err = chainreader.NewBlockchainGrpcReader(s.ServiceLifeCycle.Context(), s.grpc, s.log)
 	}
 
 	if err != nil {
@@ -58,7 +65,8 @@ func (s *ChainExtractService) Run() {
 		return
 	}
 
-	defer s.mainReader.Close()
+	s.mainReader.Store(reader)
+	defer reader.Close()
 
 	<-s.Done()
 }

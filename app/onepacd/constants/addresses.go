@@ -28,3 +28,7 @@ func IsMainnetTeamHotAccount(account string) bool {
 		return false
 	}
 }
+
+const (
+	Treasury = "000000000000000000000000000000000000000000"
+)

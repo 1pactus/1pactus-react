@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/1pactus/1pactus-react/app/onepacd/constants"
 	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract/chainreader"
-	"github.com/1pactus/1pactus-react/app/onepacd/service/chainscan/constants"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	db "github.com/1pactus/1pactus-react/app/onepacd/store"
 	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
@@ -14,18 +14,14 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
-const (
-	Treasury = "000000000000000000000000000000000000000000"
-)
-
-type PgChainGather struct {
+type workerScan struct {
 	log         log.ILogger
 	grpcServers []string
 	reader      chainreader.BlockchainReader
 }
 
-func NewPgChainGather(log log.ILogger, reader chainreader.BlockchainReader) *PgChainGather {
-	p := &PgChainGather{
+func newScanWorker(log log.ILogger, reader chainreader.BlockchainReader) *workerScan {
+	p := &workerScan{
 		log:    log,
 		reader: reader,
 	}
@@ -33,7 +29,7 @@ func NewPgChainGather(log log.ILogger, reader chainreader.BlockchainReader) *PgC
 	return p
 }
 
-func (p *PgChainGather) getDailyStartHeight(height uint32) uint32 {
+func (p *workerScan) getDailyStartHeight(height uint32) uint32 {
 	if height <= 0 {
 		return 0
 	}
@@ -44,7 +40,7 @@ func (p *PgChainGather) getDailyStartHeight(height uint32) uint32 {
 	return startHeight
 }
 
-func (p *PgChainGather) GetTimeIndex(timestamp uint32) int64 {
+func (p *workerScan) GetTimeIndex(timestamp uint32) int64 {
 	t := time.Unix(int64(timestamp), 0).UTC()
 
 	year, month, day := t.Date()
@@ -54,7 +50,7 @@ func (p *PgChainGather) GetTimeIndex(timestamp uint32) int64 {
 	return dayStart.Unix()
 }
 
-func (p *PgChainGather) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, chan error) {
+func (p *workerScan) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, chan error) {
 	wg.Add(1)
 
 	commitChan := make(chan *db.PgDBCommit, 64)
@@ -87,7 +83,7 @@ func (p *PgChainGather) startCommit(wg *sync.WaitGroup) (chan *db.PgDBCommit, ch
 	return commitChan, errorChan
 }
 
-func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
+func (p *workerScan) FetchBlockchain(dieChan <-chan struct{}) error {
 	defer p.log.Infof("FetchBlockchain exited")
 
 	var commitWg sync.WaitGroup
@@ -151,7 +147,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 			return err
 		case block, ok := <-group.Read():
 			if !ok {
-				p.log.Infof("top height reached: %v", height)
+				p.log.Infof("top height reached: %v, commit cancelled", height)
 				commitChan <- nil // close commitChan
 				commitWg.Wait()
 				return nil
@@ -214,7 +210,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 						globalState.CirculatingSupply -= tx.GetTransfer().Amount
 					}
 
-					if tx.GetTransfer().Sender == Treasury {
+					if tx.GetTransfer().Sender == constants.Treasury {
 						txMerger.AddReward(timeIndex, tx.GetTransfer().Receiver, tx.GetTransfer().Amount, block.Header.ProposerAddress)
 					} else {
 						txMerger.AddTransfer(timeIndex, tx.GetTransfer().Sender, tx.GetTransfer().Receiver, tx.GetTransfer().Amount, tx.Fee)
@@ -256,7 +252,7 @@ func (p *PgChainGather) FetchBlockchain(dieChan <-chan struct{}) error {
 							globalState.CirculatingSupply -= recipient.Amount
 						}
 
-						if bt.Sender == Treasury {
+						if bt.Sender == constants.Treasury {
 							txMerger.AddReward(timeIndex, recipient.Receiver, recipient.Amount, block.Header.ProposerAddress)
 						} else {
 							txMerger.AddTransfer(timeIndex, bt.Sender, recipient.Receiver, recipient.Amount, tx.Fee)

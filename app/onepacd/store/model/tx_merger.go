@@ -8,7 +8,7 @@ const (
 	TreasuryAddress = "000000000000000000000000000000000000000000"
 )
 
-type TxUnbond struct {
+type _TxUnbond struct {
 	Height int64
 	Time   int64
 	Hash   string
@@ -22,7 +22,7 @@ type TxMerger struct {
 	bondReceiver map[int64]map[string]*txTransferMerged
 	bondSender   map[int64]map[string]*txTransferMerged
 
-	unbond map[int64]map[string]TxUnbond
+	unbond map[int64]map[string]_TxUnbond
 
 	withdrawSender   map[int64]map[string]*txTransferMerged
 	withdrawReceiver map[int64]map[string]*txTransferMerged
@@ -163,11 +163,11 @@ func (m *TxMerger) AddBond(timeIndex int64, sender string, receiver string, stak
 
 func (m *TxMerger) AddUnbond(timeIndex int64, validator string, height int64, hash string, time int64) error {
 	if _, ok := m.unbond[timeIndex]; !ok {
-		m.unbond[timeIndex] = make(map[string]TxUnbond)
+		m.unbond[timeIndex] = make(map[string]_TxUnbond)
 	}
 
 	if _, ok := m.unbond[timeIndex][validator]; !ok {
-		m.unbond[timeIndex][validator] = TxUnbond{Height: height, Hash: hash, Time: time}
+		m.unbond[timeIndex][validator] = _TxUnbond{Height: height, Hash: hash, Time: time}
 	} else {
 		return fmt.Errorf("unbond record already exists")
 	}
@@ -227,7 +227,7 @@ func (m *TxMerger) Clean() {
 	m.bondSender = make(map[int64]map[string]*txTransferMerged)
 	m.withdrawReceiver = make(map[int64]map[string]*txTransferMerged)
 	m.withdrawSender = make(map[int64]map[string]*txTransferMerged)
-	m.unbond = make(map[int64]map[string]TxUnbond)
+	m.unbond = make(map[int64]map[string]_TxUnbond)
 	m.accountBalanceChange = make(map[string]int64)
 	m.validatorStakeChange = make(map[string]int64)
 }

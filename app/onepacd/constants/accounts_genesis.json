@@ -1,0 +1,22 @@
+[
+    {
+        "address": "000000000000000000000000000000000000000000",
+        "balance": 21000000000000000
+    },
+    {
+        "address": "pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z",
+        "balance": 8400000000000000
+    },
+    {
+        "address": "pc1zprhnvcsy3pthekdcu28cw8muw4f432hkwgfasv",
+        "balance": 6300000000000000
+    },
+    {
+        "address": "pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45",
+        "balance": 4200000000000000
+    },
+    {
+        "address": "pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3",
+        "balance": 2100000000000000
+    }
+]

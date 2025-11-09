@@ -14,7 +14,7 @@ type ReaderProvider interface {
 	GetReader() chainreader.BlockchainReader
 }
 
-type DataGatherService struct {
+type ChainscanService struct {
 	*lifecycle.ServiceLifeCycle
 	log            log.ILogger
 	config         *Config
@@ -23,30 +23,39 @@ type DataGatherService struct {
 	readerProvider ReaderProvider
 }
 
-func NewGatherService(appLifeCycle *lifecycle.AppLifeCycle, config *Config, readerProvider ReaderProvider) *DataGatherService {
-	return &DataGatherService{
+func NewChainscanService(appLifeCycle *lifecycle.AppLifeCycle, config *Config, readerProvider ReaderProvider) *ChainscanService {
+	return &ChainscanService{
 		ServiceLifeCycle: lifecycle.NewServiceLifeCycle(appLifeCycle),
-		log:              log.WithKv("service", "gather"),
+		log:              log.WithKv("service", "chainscan"),
 		config:           config,
 		cron:             cron.New(cron.WithLocation(time.UTC)),
 		readerProvider:   readerProvider,
 	}
 }
 
-func (s *DataGatherService) Run() {
+func (s *ChainscanService) Run() {
 	defer s.LifeCycleDead(true)
-	defer s.log.Info("BYE")
+	defer s.log.Info("Chain Scan Service stopped")
+	s.log.Infof("Chain Scan Service is starting...")
 
 	gatherChan := make(chan struct{}, 2)
 
 	defer close(gatherChan)
 
+	time.Sleep(1 * time.Second) // wait for chainextract to start
+
 	for {
 		s.reader = s.readerProvider.GetReader()
 		if s.reader == nil {
-			s.log.Warnf("blockchain reader is not initialized yet, retrying in 5 seconds...")
-			time.Sleep(5 * time.Second)
-			continue
+			s.log.Warnf("blockchain reader is not initialized yet, retrying in 1 seconds...")
+			time.Sleep(1 * time.Second)
+
+			select {
+			case <-s.Done(): // exit if service is stopping
+				return
+			default:
+				continue
+			}
 		} else {
 			break
 		}
@@ -66,51 +75,43 @@ func (s *DataGatherService) Run() {
 
 	gatherChan <- struct{}{}
 
-	go s.runGatherWorker(gatherChan)
+	go s.runWorker(gatherChan)
 
 	<-s.Done()
 	s.log.Info("data collect received done signal")
 }
 
-func (s *DataGatherService) runGatherWorker(gatherChan <-chan struct{}) {
+func (s *ChainscanService) runWorker(gatherChan <-chan struct{}) {
 	s.log.Infof("gather waiting started")
 	defer s.log.Infof("gather waiting stopped")
 	for range gatherChan {
-		err := s.startGatherBlockchain(s.Done())
+		err := s.startScan(s.Done())
 		if err != nil {
 			s.log.Errorf("%v", err)
 		}
 	}
 }
 
-func (s *DataGatherService) startGatherBlockchain(dieChan <-chan struct{}) (err error) {
+func (s *ChainscanService) startScan(dieChan <-chan struct{}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("startGather panic: %v", r)
+			err = fmt.Errorf("startScan panic: %v", r)
 		}
 	}()
 
-	s.log.Infof("blockchain gather started")
-	defer s.log.Infof("blockchain gather stopped")
+	timeStart := time.Now()
 
-	cg := NewPgChainGather(s.log, s.reader)
+	s.log.Infof("blockchain scan started, timeStart=%v", timeStart.UTC())
+	defer func() {
+		s.log.Infof("blockchain scan stopped, timeStart=%v, timeEnd=%v, duration=%v",
+			timeStart.UTC(), time.Now().UTC(), time.Since(timeStart))
+	}()
+
+	cg := newScanWorker(s.log, s.reader)
 
 	if err := cg.FetchBlockchain(dieChan); err != nil {
 		return fmt.Errorf("failed to fetch blockchain: %w", err)
 	}
-
-	/*if timeIndexes, err := store.Mongo.GetLastDaysTimeIndex(30); err == nil {
-		for _, timeIndex := range timeIndexes {
-			s.log.Infof("fetching global state for time index %d", timeIndex)
-		}
-	}*/
-
-	/*
-		if data, err := store.Mongo.GetUnbond(30); err == nil {
-			for k, v := range data {
-				s.log.Infof("unbond at time index %d: %d", k, v)
-			}
-		}*/
 
 	return nil
 }

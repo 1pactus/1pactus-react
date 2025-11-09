@@ -22,13 +22,13 @@ const (
 
 var (
 	chainExtractService *chainextract.ChainExtractService
-	chainscanService    *chainscan.DataGatherService
+	chainscanService    *chainscan.ChainscanService
 	webApiService       *webapi.WebApiService
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
 	chainExtractService = chainextract.NewChainExtractService(appLifeCycle, conf.Service.ChainExtract, conf.Kafka.Enable)
-	chainscanService = chainscan.NewGatherService(appLifeCycle, conf.Service.Chainscan, chainExtractService)
+	chainscanService = chainscan.NewChainscanService(appLifeCycle, conf.Service.Chainscan, chainExtractService)
 	webApiService = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 
 	appLifeCycle.WatchServiceLifeCycle(chainExtractService.ServiceLifeCycle)
