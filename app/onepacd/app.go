@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/1pactus/1pactus-react/app/onepacd/service/chainextract"
-	gather "github.com/1pactus/1pactus-react/app/onepacd/service/gather"
+	"github.com/1pactus/1pactus-react/app/onepacd/service/chainscan"
 	"github.com/1pactus/1pactus-react/app/onepacd/service/webapi"
 	"github.com/1pactus/1pactus-react/app/onepacd/store"
 	"github.com/1pactus/1pactus-react/lifecycle"
@@ -21,33 +21,33 @@ const (
 )
 
 var (
-	dataCollect         *gather.DataGatherService
-	webApi              *webapi.WebApiService
 	chainExtractService *chainextract.ChainExtractService
+	chainscanService    *chainscan.DataGatherService
+	webApiService       *webapi.WebApiService
 )
 
 func InitServices(appLifeCycle *lifecycle.AppLifeCycle) error {
 	chainExtractService = chainextract.NewChainExtractService(appLifeCycle, conf.Service.ChainExtract, conf.Kafka.Enable)
-	dataCollect = gather.NewGatherService(appLifeCycle, conf.Service.Gather, chainExtractService)
-	webApi = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
+	chainscanService = chainscan.NewGatherService(appLifeCycle, conf.Service.Chainscan, chainExtractService)
+	webApiService = webapi.NewWebApiService(appLifeCycle, conf.App.RunMode, conf.Service.WebApi)
 
 	appLifeCycle.WatchServiceLifeCycle(chainExtractService.ServiceLifeCycle)
-	appLifeCycle.WatchServiceLifeCycle(dataCollect.ServiceLifeCycle)
-	appLifeCycle.WatchServiceLifeCycle(webApi.ServiceLifeCycle)
+	appLifeCycle.WatchServiceLifeCycle(chainscanService.ServiceLifeCycle)
+	appLifeCycle.WatchServiceLifeCycle(webApiService.ServiceLifeCycle)
 
 	return nil
 }
 
 func RunServices() {
 	go chainExtractService.Run()
-	go dataCollect.Run()
-	go webApi.Run()
+	go chainscanService.Run()
+	go webApiService.Run()
 }
 
 func Run() {
-	log.Info("HI")
+	log.Info("Starting application")
 
-	defer log.Info("BYE")
+	defer log.Info("Stoped application")
 
 	if err := store.Init(conf.ConfigBase); err != nil {
 		log.Fatalf("failed to initialize store: %v", err)

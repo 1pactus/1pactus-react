@@ -27,13 +27,14 @@ func Init(config *config.ConfigBase) error {
 func Close() {
 }
 
+/*
 func setupMongo(conf *config.MongoConfig) (err error) {
 	err = storedriver.MongoStart("base", conf, []storedriver.IMongoStore{
 		Mongo,
 	})
 
 	return
-}
+}*/
 
 func setupPostgres(conf *config.PostgresConfig) error {
 	if err := storedriver.PostgresGormStart("base", conf, []storedriver.IPostgresGormStore{

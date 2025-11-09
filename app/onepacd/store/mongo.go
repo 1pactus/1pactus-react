@@ -1,5 +1,6 @@
 package store
 
+/**
 import (
 	"log"
 	"time"
@@ -34,15 +35,15 @@ func (s *mongoStore) Init(store storedriver.Mongo, conf *config.MongoConfig) {
 
 func (s *mongoStore) Indexes() map[*mongo.Collection][]mongo.IndexModel {
 	return map[*mongo.Collection][]mongo.IndexModel{
-		/*s.player: {
+		s.player: {
 			{
 				Keys:    bson.D{{Key: "user_id", Value: 1}},
 				Options: options.Index().SetUnique(true),
 			},
-		},*/
+		},
 	}
 }
 
 func (s *mongoStore) GetDBAdapter() *DbClient {
 	return s.db
-}
+}**/

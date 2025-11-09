@@ -34,9 +34,7 @@ redis:
 service:
   webapi:
     http_listen: ":13665"
-  gather:
-    grpc_servers: 
-      - ${ONEPACD_PACTUS_GRPC_SERVER:-localhost:50051}
+  chainscan:
   chainextract:
     grpc_servers: 
       - ${ONEPACD_PACTUS_GRPC_SERVER:-localhost:50051}

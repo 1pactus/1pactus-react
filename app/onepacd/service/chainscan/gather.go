@@ -1,4 +1,4 @@
-package gather
+package chainscan
 
 import (
 	"fmt"

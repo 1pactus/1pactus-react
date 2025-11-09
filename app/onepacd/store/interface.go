@@ -3,11 +3,12 @@ package store
 import (
 	"context"
 
-	"github.com/1pactus/1pactus-react/app/onepacd/store/data"
 	"github.com/1pactus/1pactus-react/app/onepacd/store/model"
 	"github.com/1pactus/1pactus-react/store/storedriver"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
+
+/*
 
 type IMongo interface {
 	storedriver.IMongoStore
@@ -16,7 +17,7 @@ type IMongo interface {
 
 	GetNetworkGlobalStats(count int64) ([]data.GlobalStateData, error)
 	GetUnbond(days int) (map[int64]int64, error)
-}
+}*/
 
 type IPostgres interface {
 	storedriver.IPostgresGormStore
@@ -39,7 +40,7 @@ type IKafka interface {
 }
 
 var (
-	Mongo    IMongo    = &mongoStore{}
+	//Mongo    IMongo    = &mongoStore{}
 	Postgres IPostgres = &postgresStore{}
 	Kafka    IKafka    = &kafkaStore{}
 )
